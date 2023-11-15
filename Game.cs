@@ -6,6 +6,10 @@
         private Shape currentShape;
         private bool isGameOver;
 
+        public Board Board { get { return board; } }
+        public Shape CurrentShape { get { return currentShape; } }
+        public bool IsGameOver { get { return isGameOver; } }
+
         public Game()
         {
             board = new Board();
@@ -13,7 +17,10 @@
         }
 
         // Method to start the game loop
-        public void Start() { /* ... */ }
+        public void Start()
+        {
+            InitializeNewShape();
+        }
 
         public void Update()
         {
@@ -28,12 +35,8 @@
                 InitializeNewShape(); // Create a new shape for the next turn
             }
 
-            // Check for game over condition
-            if (IsGameOver())
-            {
-                isGameOver = true;
-                // Handle game over (e.g., display game over message, stop the game loop)
-            }
+            // Update game over condition
+            isGameOver = CheckGameOver();
         }
 
         public void InitializeNewShape()
@@ -57,7 +60,6 @@
             return new Shape(); // Replace this with actual shape creation logic
         }
 
-
         private void MoveShapeDown()
         {
             // Move each block of the shape down by 1
@@ -74,7 +76,7 @@
             return false; // Replace with actual logic
         }
 
-        private bool IsGameOver()
+        private bool CheckGameOver()
         {
             // Game over logic
             // A simple check: if any block in the top row is occupied, it's game over
@@ -85,7 +87,5 @@
             }
             return false;
         }
-
     }
-
 }
