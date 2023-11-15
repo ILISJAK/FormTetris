@@ -8,24 +8,25 @@ namespace FormTetris
     {
         private Game game;
         private Timer gameTimer;
-        private const int BlockSize = 20; // Size of each block in pixels
+        private int BlockSize = 20; // Size of each block in pixels
         private Point gameAreaStart;
 
         private bool isFullScreen = false;
-        private Size defaultSize = new Size(800, 600);
+        private Size defaultSize = new Size(800, 600); // Default window size
 
         public TetrisForm()
         {
             InitializeComponent();
             InitializeGame();
+            SetAspectRatio();
         }
 
         private void SetAspectRatio()
         {
-            this.ClientSize = defaultSize;
-            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle; // Prevents resizing
             this.MaximizeBox = false;
             this.MinimizeBox = false;
+            this.ClientSize = defaultSize;
             ConfigureForm();
         }
 
@@ -33,9 +34,8 @@ namespace FormTetris
         {
             if (!isFullScreen)
             {
-                this.WindowState = FormWindowState.Normal;
                 this.FormBorderStyle = FormBorderStyle.None;
-                this.Bounds = Screen.PrimaryScreen.Bounds;
+                this.WindowState = FormWindowState.Maximized;
                 isFullScreen = true;
             }
             else
@@ -43,40 +43,34 @@ namespace FormTetris
                 this.FormBorderStyle = FormBorderStyle.FixedSingle;
                 this.WindowState = FormWindowState.Normal;
                 this.ClientSize = defaultSize;
-                ConfigureForm();
                 isFullScreen = false;
             }
+            ConfigureForm(); // Recalculate game area start
         }
 
         private void ConfigureForm()
         {
-            // Calculation for the centered game area position
+            // Adjust BlockSize based on the height of the window
+            BlockSize = this.ClientSize.Height / game.Board.BoardHeight;
+
+            // Recalculate gameAreaWidth and gameAreaHeight based on the new BlockSize
             int gameAreaWidth = game.Board.BoardWidth * BlockSize;
             int gameAreaHeight = game.Board.BoardHeight * BlockSize;
 
-            // Calculate the starting point to center the game area in the window
-            // Adjust these calculations based on your desired layout and additional side information
-            int sidePadding = (this.ClientSize.Width - gameAreaWidth) / 2;
-            int topBottomPadding = (this.ClientSize.Height - gameAreaHeight) / 2;
+            // Center the game area both horizontally and vertically
+            gameAreaStart = new Point((this.ClientSize.Width - gameAreaWidth) / 2,
+                                      (this.ClientSize.Height - gameAreaHeight) / 2);
 
-            gameAreaStart = new Point(sidePadding, topBottomPadding);
-
-            // Additional UI setup, if necessary
-            // For example, setting up labels or panels for score display on the sides
-            // ...
-
-            this.BackColor = Color.Black; // Set background color; adjust as desired
+            this.BackColor = Color.Black;
         }
-
 
         private void InitializeGame()
         {
             game = new Game();
             game.Start();
-            ConfigureForm();
 
             gameTimer = new Timer();
-            gameTimer.Interval = 1000; // Set the game update interval (in milliseconds)
+            gameTimer.Interval = 1000;
             gameTimer.Tick += GameTimer_Tick;
             gameTimer.Start();
         }
@@ -84,7 +78,7 @@ namespace FormTetris
         private void GameTimer_Tick(object sender, EventArgs e)
         {
             game.Update();
-            this.Invalidate(); // Triggers the Paint event to redraw the form
+            this.Invalidate();
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -100,48 +94,46 @@ namespace FormTetris
             DrawCurrentShape(graphics);
         }
 
+        private void DrawBoardOutline(Graphics graphics)
+        {
+            int outlineWidth = game.Board.BoardWidth * BlockSize;
+            int outlineHeight = game.Board.BoardHeight * BlockSize;
+            Point outlineStart = gameAreaStart;
+
+            Pen outlinePen = new Pen(Color.White, 2); // Outline thickness
+            graphics.DrawRectangle(outlinePen, outlineStart.X, outlineStart.Y, outlineWidth, outlineHeight);
+        }
+
+
         private void DrawBoard(Graphics graphics)
         {
-            // Draw the board blocks
             for (int x = 0; x < game.Board.BoardWidth; x++)
             {
                 for (int y = 0; y < game.Board.BoardHeight; y++)
                 {
                     if (game.Board.IsPositionOccupied(x, y))
                     {
-                        DrawBlock(graphics, x, y, Brushes.Gray); // Change color as needed
+                        DrawBlock(graphics, x, y, Brushes.Gray);
                     }
                 }
             }
         }
 
-        private void DrawBoardOutline(Graphics graphics)
-        {
-            // Calculate the size of the outline based on the game area size
-            int outlineWidth = game.Board.BoardWidth * BlockSize;
-            int outlineHeight = game.Board.BoardHeight * BlockSize;
-
-            // Offset the outline position by half a block size to encompass the entire game area
-            Point outlineStart = new Point(gameAreaStart.X - BlockSize / 2, gameAreaStart.Y - BlockSize / 2);
-
-            // Draw the outline
-            Pen outlinePen = new Pen(Color.White, 2); // 2 is the thickness of the outline; adjust as needed
-            graphics.DrawRectangle(outlinePen, outlineStart.X, outlineStart.Y, outlineWidth, outlineHeight);
-        }
-
         private void DrawCurrentShape(Graphics graphics)
         {
-            // Draw the current shape
             foreach (var block in game.CurrentShape.Blocks)
             {
-                DrawBlock(graphics, block.X, block.Y, Brushes.Blue); // Change color as needed
+                DrawBlock(graphics, block.X, block.Y, Brushes.Blue);
             }
         }
 
         private void DrawBlock(Graphics graphics, int x, int y, Brush brush)
         {
-            graphics.FillRectangle(brush, x * BlockSize, y * BlockSize, BlockSize, BlockSize);
+            int drawX = gameAreaStart.X + x * BlockSize;
+            int drawY = gameAreaStart.Y + y * BlockSize;
+            graphics.FillRectangle(brush, drawX, drawY, BlockSize, BlockSize);
         }
+
 
         protected override void OnKeyDown(KeyEventArgs e)
         {

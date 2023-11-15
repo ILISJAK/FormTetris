@@ -42,16 +42,15 @@
         public void InitializeNewShape()
         {
             currentShape = CreateNewShape();
-            // Position the shape at the top of the board
-            // For simplicity, let's say the starting position is at the top middle
-            int startX = board.BoardWidth / 2;
-            int startY = 0;
+            int startX = Board.BoardWidth / 2 - 2; // Center the shape horizontally
+            int startY = 0; // Start at the top of the board
             foreach (var block in currentShape.Blocks)
             {
-                block.X = startX + block.X;
-                block.Y = startY + block.Y;
+                block.X += startX;
+                block.Y += startY;
             }
         }
+
 
         private Shape CreateNewShape()
         {
