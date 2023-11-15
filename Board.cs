@@ -4,6 +4,11 @@
     {
         private const int Width = 10;
         private const int Height = 20;
+
+        // Public properties to access Width and Height
+        public int BoardWidth => Width;
+        public int BoardHeight => Height;
+
         private Block[,] grid;
 
         public Board()
