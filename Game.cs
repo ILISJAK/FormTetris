@@ -1,4 +1,7 @@
-﻿namespace FormTetris
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace FormTetris
 {
     public class Game
     {
@@ -34,8 +37,19 @@
         public void InitializeNewShape()
         {
             currentShape = CreateNewShape();
-            int startX = Board.BoardWidth / 2 - 2; // Center the shape horizontally
-            int startY = 0; // Start at the top of the board
+
+            // Find the width of the shape
+            int minX = currentShape.Blocks.Min(block => block.X);
+            int maxX = currentShape.Blocks.Max(block => block.X);
+            int shapeWidth = maxX - minX + 1;
+
+            // Center the shape horizontally based on its width
+            int startX = (Board.BoardWidth - shapeWidth) / 2;
+
+            // Set startY to just above the top of the board
+            int startY = -currentShape.Blocks.Min(block => block.Y);
+
+            // Adjust each block's position
             foreach (var block in currentShape.Blocks)
             {
                 block.X += startX;
@@ -64,6 +78,21 @@
 
                 // Check for collision with placed blocks
                 if (board.IsPositionOccupied(newX, newY))
+                    return false;
+            }
+            return true;
+        }
+
+        private bool CanRotateShape()
+        {
+            foreach (var block in currentShape.Blocks)
+            {
+                // Check horizontal boundaries and bottom boundary
+                if (block.X < 0 || block.X >= board.BoardWidth || block.Y >= board.BoardHeight)
+                    return false;
+
+                // Check for collision with placed blocks
+                if (board.IsPositionOccupied(block.X, block.Y))
                     return false;
             }
             return true;
@@ -108,7 +137,18 @@
 
         public void RotateShape()
         {
-            // Implement rotation logic with collision detection
+            // Save current state in case we need to revert the rotation
+            var originalBlocks = new List<Block>(currentShape.Blocks.Select(b => new Block { X = b.X, Y = b.Y }));
+
+            // Rotate the shape
+            currentShape.Rotate();
+
+            // Check if the rotation is valid
+            if (!CanRotateShape())
+            {
+                // Revert to original state if rotation is not valid
+                currentShape.ResetBlocks(originalBlocks);
+            }
         }
 
         private bool HasLanded()

@@ -164,6 +164,9 @@ namespace FormTetris
                 case Keys.Down:
                     game.MoveShapeDown();
                     break;
+                case Keys.Space:
+                    game.RotateShape();
+                    break;
             }
 
             this.Invalidate(); // Redraw the form to reflect the changes

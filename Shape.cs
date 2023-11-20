@@ -1,25 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace FormTetris
 {
     public class Shape
     {
         private List<Block> blocks;
+        public List<Block> Blocks => blocks;
 
-        public List<Block> Blocks
+        private static readonly List<List<Block>> Shapes = new List<List<Block>>
         {
-            get { return blocks; }
-        }
+            new List<Block> { new Block { X = 0, Y = 0 }, new Block { X = 1, Y = 0 }, new Block { X = 2, Y = 0 }, new Block { X = 3, Y = 0 } }, // I
+            new List<Block> { new Block { X = 0, Y = 0 }, new Block { X = 1, Y = 0 }, new Block { X = 0, Y = 1 }, new Block { X = 1, Y = 1 } }, // O
+            new List<Block> { new Block { X = 1, Y = 0 }, new Block { X = 0, Y = 1 }, new Block { X = 1, Y = 1 }, new Block { X = 2, Y = 1 } }, // T
+            new List<Block> { new Block { X = 1, Y = 0 }, new Block { X = 2, Y = 0 }, new Block { X = 0, Y = 1 }, new Block { X = 1, Y = 1 } }, // S
+            new List<Block> { new Block { X = 0, Y = 0 }, new Block { X = 1, Y = 0 }, new Block { X = 1, Y = 1 }, new Block { X = 2, Y = 1 } }, // Z
+            new List<Block> { new Block { X = 0, Y = 0 }, new Block { X = 0, Y = 1 }, new Block { X = 1, Y = 1 }, new Block { X = 2, Y = 1 } }, // J
+            new List<Block> { new Block { X = 2, Y = 0 }, new Block { X = 0, Y = 1 }, new Block { X = 1, Y = 1 }, new Block { X = 2, Y = 1 } }  // L
+        };
+
 
         public Shape()
         {
-            blocks = new List<Block>
-            {
-                new Block { X = 0, Y = 0 },
-                new Block { X = 1, Y = 0 },
-                new Block { X = 2, Y = 0 },
-                new Block { X = 3, Y = 0 }
-            };
+            var random = new Random();
+            int shapeIndex = random.Next(Shapes.Count);
+            blocks = Shapes[shapeIndex];
+        }
+
+        public void ResetBlocks(List<Block> originalBlocks)
+        {
+            blocks = new List<Block>(originalBlocks);
         }
 
         // Method to move the shape left
@@ -52,9 +62,21 @@ namespace FormTetris
         // Method to rotate the shape
         public void Rotate()
         {
-            // Implement rotation logic here.
-            // This can be complex depending on the shape.
-            // For a simple implementation, you could rotate around the first block in the list.
+            var pivot = blocks[0];
+            foreach (var block in blocks)
+            {
+                // Translate block to origin (pivot)
+                int translatedX = block.X - pivot.X;
+                int translatedY = block.Y - pivot.Y;
+
+                // Rotate 90 degrees clockwise
+                int rotatedX = translatedY;
+                int rotatedY = -translatedX;
+
+                // Translate block back to pivot position
+                block.X = pivot.X + rotatedX;
+                block.Y = pivot.Y + rotatedY;
+            }
         }
 
         // Additional methods as needed
