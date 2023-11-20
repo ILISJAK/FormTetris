@@ -153,20 +153,21 @@ namespace FormTetris
             switch (e.KeyCode)
             {
                 case Keys.Left:
-                    game.CurrentShape.MoveLeft();
+                    game.MoveShapeLeft();
                     break;
                 case Keys.Right:
-                    game.CurrentShape.MoveRight();
+                    game.MoveShapeRight();
                     break;
                 case Keys.Up:
-                    game.CurrentShape.Rotate();
+                    game.RotateShape();
                     break;
                 case Keys.Down:
-                    game.CurrentShape.MoveDown();
+                    game.MoveShapeDown();
                     break;
             }
 
             this.Invalidate(); // Redraw the form to reflect the changes
         }
+
     }
 }

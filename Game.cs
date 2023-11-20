@@ -24,20 +24,12 @@
 
         public void Update()
         {
-            // Move the current shape down
             MoveShapeDown();
-
-            // Check for landing
-            if (HasLanded())
-            {
-                board.PlaceShape(currentShape);
-                board.CheckLines();
-                InitializeNewShape(); // Create a new shape for the next turn
-            }
 
             // Update game over condition
             isGameOver = CheckGameOver();
         }
+
 
         public void InitializeNewShape()
         {
@@ -59,20 +51,69 @@
             return new Shape(); // Replace this with actual shape creation logic
         }
 
-        private void MoveShapeDown()
+        private bool CanMoveShape(int deltaX, int deltaY)
         {
-            // Move each block of the shape down by 1
             foreach (var block in currentShape.Blocks)
             {
-                block.Y += 1;
+                int newX = block.X + deltaX;
+                int newY = block.Y + deltaY;
+
+                // Check horizontal boundaries and bottom boundary
+                if (newX < 0 || newX >= board.BoardWidth || newY >= board.BoardHeight)
+                    return false;
+
+                // Check for collision with placed blocks
+                if (board.IsPositionOccupied(newX, newY))
+                    return false;
             }
+            return true;
+        }
+
+        private void PlaceShapeAndCheckLines()
+        {
+            board.PlaceShape(currentShape);
+            board.CheckLines();
+            InitializeNewShape(); // Create a new shape for the next turn
+        }
+
+
+        public void MoveShapeDown()
+        {
+            if (CanMoveShape(0, 1)) // Check if the shape can move down
+            {
+                currentShape.MoveDown();
+            }
+            else
+            {
+                // Handle what happens when the shape lands
+                PlaceShapeAndCheckLines();
+            }
+        }
+
+        public void MoveShapeLeft()
+        {
+            if (CanMoveShape(-1, 0))
+            {
+                currentShape.MoveLeft();
+            }
+        }
+
+        public void MoveShapeRight()
+        {
+            if (CanMoveShape(1, 0))
+            {
+                currentShape.MoveRight();
+            }
+        }
+
+        public void RotateShape()
+        {
+            // Implement rotation logic with collision detection
         }
 
         private bool HasLanded()
         {
-            // Implement logic to check if the shape has landed
-            // A shape has landed if any block is at the bottom or on top of another block
-            return false; // Replace with actual logic
+            return !CanMoveShape(0, 1);
         }
 
         private bool CheckGameOver()
