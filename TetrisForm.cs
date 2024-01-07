@@ -159,13 +159,16 @@ namespace FormTetris
                     game.MoveShapeRight();
                     break;
                 case Keys.Up:
-                    game.RotateShape();
+                    // game.RotateShape(true);
                     break;
                 case Keys.Down:
                     game.MoveShapeDown();
                     break;
-                case Keys.Space:
-                    game.RotateShape();
+                case Keys.Q:
+                    game.RotateShape(false);
+                    break;
+                case Keys.E:
+                    game.RotateShape(true);
                     break;
             }
 

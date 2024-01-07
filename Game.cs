@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 
 namespace FormTetris
 {
@@ -135,20 +134,9 @@ namespace FormTetris
             }
         }
 
-        public void RotateShape()
+        public void RotateShape(bool clockwise)
         {
-            // Save current state in case we need to revert the rotation
-            var originalBlocks = new List<Block>(currentShape.Blocks.Select(b => new Block { X = b.X, Y = b.Y }));
-
-            // Rotate the shape
-            currentShape.Rotate();
-
-            // Check if the rotation is valid
-            if (!CanRotateShape())
-            {
-                // Revert to original state if rotation is not valid
-                currentShape.ResetBlocks(originalBlocks);
-            }
+            currentShape.Rotate(clockwise, board); // Pass clockwise and board to Rotate
         }
 
         private bool HasLanded()
