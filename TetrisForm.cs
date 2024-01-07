@@ -6,196 +6,61 @@ namespace FormTetris
 {
     public partial class TetrisForm : Form
     {
-        private Game game;
-        private Timer logicTimer;
-        private Timer renderTimer;
-        private int BlockSize = 20; // Size of each block in pixels
-        private Point gameAreaStart;
-
-        private bool isFullScreen = false;
-        private Size defaultSize = new Size(800, 600); // Default window size
+        private GameRenderer gameRenderer;
+        private InputManager inputManager;
+        private GameInitializer gameInitializer;
+        private FormWindowConfiguration windowConfig;
+        private FormViewManager viewManager;
 
         public TetrisForm()
         {
-            this.DoubleBuffered = true; // Enable double buffering
             InitializeComponent();
-            InitializeGame();
+            this.DoubleBuffered = true;
+
+            gameInitializer = new GameInitializer(this.ClientSize, Invalidate);
+            gameInitializer.Initialize(out gameRenderer);
+
+            inputManager = new InputManager(gameInitializer.Game, Invalidate);
+            this.KeyDown += OnKeyDown;
+
+            windowConfig = new FormWindowConfiguration(this, new Size(800, 600));
+            viewManager = new FormViewManager(this);
+
+            this.Resize += TetrisForm_Resize;
             SetAspectRatio();
-            InitializeTimers();
         }
 
-
-        private void InitializeTimers()
+        private void TetrisForm_Resize(object sender, EventArgs e)
         {
-            // Game Logic Timer
-            logicTimer = new Timer();
-            logicTimer.Interval = 1000; // Game logic interval (e.g., piece fall rate)
-            logicTimer.Tick += LogicTimer_Tick;
-            logicTimer.Start();
-
-            // Rendering Timer for 60 FPS
-            renderTimer = new Timer();
-            renderTimer.Interval = 1000 / 60; // Approximately 60 FPS
-            renderTimer.Tick += RenderTimer_Tick;
-            renderTimer.Start();
-        }
-
-        private void LogicTimer_Tick(object sender, EventArgs e)
-        {
-            game.Update();
-        }
-
-        private void RenderTimer_Tick(object sender, EventArgs e)
-        {
-            this.Invalidate(); // Triggers a redraw of the form
+            gameInitializer.UpdateFormSize(this.ClientSize);
+            gameRenderer.UpdateSize(this.ClientSize);
+            this.Invalidate();
         }
 
         private void SetAspectRatio()
         {
-            this.FormBorderStyle = FormBorderStyle.FixedSingle; // Prevents resizing
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.ClientSize = defaultSize;
-            ConfigureForm();
+            this.ClientSize = gameInitializer.DefaultSize;
         }
 
-        private void ToggleFullScreen()
+        private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (!isFullScreen)
+            if (e.KeyCode == Keys.F11)
             {
-                this.FormBorderStyle = FormBorderStyle.None;
-                this.WindowState = FormWindowState.Maximized;
-                isFullScreen = true;
+                windowConfig.ToggleFullScreen();
+                return;
             }
-            else
-            {
-                this.FormBorderStyle = FormBorderStyle.FixedSingle;
-                this.WindowState = FormWindowState.Normal;
-                this.ClientSize = defaultSize;
-                isFullScreen = false;
-            }
-            ConfigureForm(); // Recalculate game area start
-        }
 
-        private void ConfigureForm()
-        {
-            // Adjust BlockSize based on the height of the window
-            BlockSize = this.ClientSize.Height / game.Board.BoardHeight;
-
-            // Recalculate gameAreaWidth and gameAreaHeight based on the new BlockSize
-            int gameAreaWidth = game.Board.BoardWidth * BlockSize;
-            int gameAreaHeight = game.Board.BoardHeight * BlockSize;
-
-            // Center the game area both horizontally and vertically
-            gameAreaStart = new Point((this.ClientSize.Width - gameAreaWidth) / 2,
-                                      (this.ClientSize.Height - gameAreaHeight) / 2);
-
-            this.BackColor = Color.Black;
-        }
-
-        private void InitializeGame()
-        {
-            game = new Game();
-            game.Start();
-
-            InitializeTimers(); // Initialize both the logic and render timers
+            inputManager.HandleKeyDown(e);
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            DrawGame(e.Graphics);
+            gameRenderer.DrawGame(e.Graphics);
         }
-
-
-        private void DrawGame(Graphics graphics)
-        {
-            DrawBoardOutline(graphics);
-            DrawBoard(graphics);
-            DrawCurrentShape(graphics);
-        }
-
-        private void DrawBoardOutline(Graphics graphics)
-        {
-            int outlineWidth = game.Board.BoardWidth * BlockSize;
-            int outlineHeight = game.Board.BoardHeight * BlockSize;
-            Point outlineStart = gameAreaStart;
-
-            Pen outlinePen = new Pen(Color.White, 2); // Outline thickness
-            graphics.DrawRectangle(outlinePen, outlineStart.X, outlineStart.Y, outlineWidth, outlineHeight);
-        }
-
-
-        private void DrawBoard(Graphics graphics)
-        {
-            for (int x = 0; x < game.Board.BoardWidth; x++)
-            {
-                for (int y = 0; y < game.Board.BoardHeight; y++)
-                {
-                    if (game.Board.IsPositionOccupied(x, y))
-                    {
-                        DrawBlock(graphics, x, y, Brushes.Gray);
-                    }
-                }
-            }
-        }
-
-        private void DrawCurrentShape(Graphics graphics)
-        {
-            foreach (var block in game.CurrentShape.Blocks)
-            {
-                DrawBlock(graphics, block.X, block.Y, Brushes.Blue);
-            }
-        }
-
-        private void DrawBlock(Graphics graphics, int x, int y, Brush brush)
-        {
-            int drawX = gameAreaStart.X + x * BlockSize;
-            int drawY = gameAreaStart.Y + y * BlockSize;
-            graphics.FillRectangle(brush, drawX, drawY, BlockSize, BlockSize);
-        }
-
-
-        protected override void OnKeyDown(KeyEventArgs e)
-        {
-            base.OnKeyDown(e);
-
-            if (game.IsGameOver)
-            {
-                return; // Don't handle input if the game is over
-            }
-
-            if (e.KeyCode == Keys.F11)
-            {
-                ToggleFullScreen();
-                return;
-            }
-
-            switch (e.KeyCode)
-            {
-                case Keys.Left:
-                    game.MoveShapeLeft();
-                    break;
-                case Keys.Right:
-                    game.MoveShapeRight();
-                    break;
-                case Keys.Up:
-                    // game.RotateShape(true);
-                    break;
-                case Keys.Down:
-                    game.MoveShapeDown();
-                    break;
-                case Keys.Q:
-                    game.RotateShape(false);
-                    break;
-                case Keys.E:
-                    game.RotateShape(true);
-                    break;
-            }
-
-            this.Invalidate(); // Redraw the form to reflect the changes
-        }
-
     }
 }

@@ -48,7 +48,12 @@
   <ItemGroup>
     <Compile Include="Block.cs" />
     <Compile Include="Board.cs" />
+    <Compile Include="FormViewManager.cs" />
+    <Compile Include="FormWindowConfiguration.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="GameInitializer.cs" />
+    <Compile Include="GameRenderer.cs" />
+    <Compile Include="InputManager.cs" />
     <Compile Include="Shape.cs" />
     <Compile Include="TetrisForm.cs">
       <SubType>Form</SubType>
