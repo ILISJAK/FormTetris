@@ -7,7 +7,8 @@ namespace FormTetris
     public partial class TetrisForm : Form
     {
         private Game game;
-        private Timer gameTimer;
+        private Timer logicTimer;
+        private Timer renderTimer;
         private int BlockSize = 20; // Size of each block in pixels
         private Point gameAreaStart;
 
@@ -16,9 +17,37 @@ namespace FormTetris
 
         public TetrisForm()
         {
+            this.DoubleBuffered = true; // Enable double buffering
             InitializeComponent();
             InitializeGame();
             SetAspectRatio();
+            InitializeTimers();
+        }
+
+
+        private void InitializeTimers()
+        {
+            // Game Logic Timer
+            logicTimer = new Timer();
+            logicTimer.Interval = 1000; // Game logic interval (e.g., piece fall rate)
+            logicTimer.Tick += LogicTimer_Tick;
+            logicTimer.Start();
+
+            // Rendering Timer for 60 FPS
+            renderTimer = new Timer();
+            renderTimer.Interval = 1000 / 60; // Approximately 60 FPS
+            renderTimer.Tick += RenderTimer_Tick;
+            renderTimer.Start();
+        }
+
+        private void LogicTimer_Tick(object sender, EventArgs e)
+        {
+            game.Update();
+        }
+
+        private void RenderTimer_Tick(object sender, EventArgs e)
+        {
+            this.Invalidate(); // Triggers a redraw of the form
         }
 
         private void SetAspectRatio()
@@ -69,23 +98,16 @@ namespace FormTetris
             game = new Game();
             game.Start();
 
-            gameTimer = new Timer();
-            gameTimer.Interval = 1000;
-            gameTimer.Tick += GameTimer_Tick;
-            gameTimer.Start();
-        }
-
-        private void GameTimer_Tick(object sender, EventArgs e)
-        {
-            game.Update();
-            this.Invalidate();
+            InitializeTimers(); // Initialize both the logic and render timers
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             DrawGame(e.Graphics);
         }
+
 
         private void DrawGame(Graphics graphics)
         {
