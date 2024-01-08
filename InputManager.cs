@@ -7,33 +7,62 @@ namespace FormTetris
     {
         private Game game;
         private Action invalidate;
+        private bool isLeftKeyPressed;
+        private bool isRightKeyPressed;
+        private bool isDownKeyPressed;
+        private Timer actionTimer;
 
         public InputManager(Game game, Action invalidate)
         {
             this.game = game;
             this.invalidate = invalidate;
+            InitializeActionTimer();
+        }
+
+        private void InitializeActionTimer()
+        {
+            actionTimer = new Timer();
+            actionTimer.Interval = 50; // Adjust for desired responsiveness
+            actionTimer.Tick += ActionTimer_Tick;
+        }
+
+        private void ActionTimer_Tick(object sender, EventArgs e)
+        {
+            if (isLeftKeyPressed)
+            {
+                game.MoveShapeLeft();
+            }
+
+            if (isRightKeyPressed)
+            {
+                game.MoveShapeRight();
+            }
+
+            if (isDownKeyPressed)
+            {
+                game.DropShape();
+            }
+
+            invalidate();
         }
 
         public void HandleKeyDown(KeyEventArgs e)
         {
             if (game.IsGameOver)
             {
-                return; // Don't handle input if the game is over
+                return;
             }
 
             switch (e.KeyCode)
             {
                 case Keys.Left:
-                    game.MoveShapeLeft();
+                    isLeftKeyPressed = true;
                     break;
                 case Keys.Right:
-                    game.MoveShapeRight();
-                    break;
-                case Keys.Up:
-                    // game.RotateShape(true); // Uncomment or implement if rotation is needed
+                    isRightKeyPressed = true;
                     break;
                 case Keys.Down:
-                    game.MoveShapeDown();
+                    isDownKeyPressed = true;
                     break;
                 case Keys.Q:
                     game.RotateShape(false);
@@ -43,8 +72,29 @@ namespace FormTetris
                     break;
             }
 
-            invalidate(); // Request to redraw the form
+            actionTimer.Start();
+            invalidate();
+        }
+
+        public void HandleKeyUp(KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Left:
+                    isLeftKeyPressed = false;
+                    break;
+                case Keys.Right:
+                    isRightKeyPressed = false;
+                    break;
+                case Keys.Down:
+                    isDownKeyPressed = false;
+                    break;
+            }
+
+            if (!isLeftKeyPressed && !isRightKeyPressed && !isDownKeyPressed)
+            {
+                actionTimer.Stop();
+            }
         }
     }
-
 }

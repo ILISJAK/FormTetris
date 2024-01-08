@@ -9,14 +9,12 @@ namespace FormTetris
         private List<Block> blocks;
         private int rotationIndex;
         private List<List<Block>> orientations;
+
         public List<Block> Blocks => new List<Block>(blocks);
 
-        public Shape()
+        public Shape(List<List<Block>> shapeOrientations)
         {
-            var random = new Random();
-            int shapeType = random.Next(Shapes.Count);
-
-            orientations = Shapes[shapeType];
+            orientations = shapeOrientations;
             rotationIndex = 0;
             blocks = new List<Block>(orientations[rotationIndex]);
         }
@@ -99,62 +97,5 @@ namespace FormTetris
 
             return false; // Wall kick not possible
         }
-
-        private static readonly List<List<List<Block>>> Shapes = new List<List<List<Block>>>
-        {
-            // I Shape
-            new List<List<Block>>
-            {
-                new List<Block> { new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(3, 1) },
-                new List<Block> { new Block(2, 0), new Block(2, 1), new Block(2, 2), new Block(2, 3) },
-                new List<Block> { new Block(0, 2), new Block(1, 2), new Block(2, 2), new Block(3, 2) },
-                new List<Block> { new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(1, 3) }
-            },
-            // O Shape
-            new List<List<Block>>
-            {
-                new List<Block> { new Block(0, 0), new Block(1, 0), new Block(0, 1), new Block(1, 1) }
-            },
-            // T Shape
-            new List<List<Block>>
-            {
-                new List<Block> { new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(2, 1) },
-                new List<Block> { new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2) },
-                new List<Block> { new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(1, 2) },
-                new List<Block> { new Block(1, 0), new Block(1, 1), new Block(2, 1), new Block(1, 2) }
-            },
-            // S Shape
-            new List<List<Block>>
-            {
-                new List<Block> { new Block(1, 0), new Block(2, 0), new Block(0, 1), new Block(1, 1) },
-                new List<Block> { new Block(1, 0), new Block(1, 1), new Block(2, 1), new Block(2, 2) },
-                new List<Block> { new Block(1, 1), new Block(2, 1), new Block(0, 2), new Block(1, 2) },
-                new List<Block> { new Block(0, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2) }
-            },
-            // Z Shape
-            new List<List<Block>>
-            {
-                new List<Block> { new Block(0, 0), new Block(1, 0), new Block(1, 1), new Block(2, 1) },
-                new List<Block> { new Block(2, 0), new Block(1, 1), new Block(2, 1), new Block(1, 2) },
-                new List<Block> { new Block(0, 1), new Block(1, 1), new Block(1, 2), new Block(2, 2) },
-                new List<Block> { new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(0, 2) }
-            },
-            // J Shape
-            new List<List<Block>>
-            {
-                new List<Block> { new Block(0, 0), new Block(0, 1), new Block(1, 1), new Block(2, 1) },
-                new List<Block> { new Block(1, 0), new Block(2, 0), new Block(1, 1), new Block(1, 2) },
-                new List<Block> { new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(2, 2) },
-                new List<Block> { new Block(1, 0), new Block(1, 1), new Block(0, 1), new Block(1, 2) }
-            },
-            // L Shape
-            new List<List<Block>>
-            {
-                new List<Block> { new Block(2, 0), new Block(0, 1), new Block(1, 1), new Block(2, 1) },
-                new List<Block> { new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(2, 2) },
-                new List<Block> { new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(0, 2) },
-                new List<Block> { new Block(0, 0), new Block(1, 0), new Block(1, 1), new Block(1, 2) }
-            }
-        };
     }
 }

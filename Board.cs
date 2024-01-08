@@ -89,7 +89,14 @@
 
         public bool IsPositionOccupied(int x, int y)
         {
-            return x >= 0 && x < Width && y >= 0 && y < Height && grid[x, y] != null;
+            // Check if the coordinates are within the board's bounds
+            if (x >= 0 && x < Width && y >= 0 && y < Height)
+            {
+                // Return true if the position is not null (i.e., there is a block there)
+                return grid[x, y] != null;
+            }
+            // If the position is out of bounds, treat it as occupied to prevent movement outside the board
+            return true;
         }
 
     }
