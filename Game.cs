@@ -30,22 +30,31 @@ namespace FormTetris
             if (!CanMoveShape(0, 1))
             {
                 PlaceShapeAndCheckLines();
+                isGameOver = CheckGameOver();
             }
             else
             {
                 MoveShapeDown();
             }
-            isGameOver = CheckGameOver();
         }
 
         private void InitializeNewShape()
         {
             currentShape = Shapes.GetRandomShape();
 
-            int shapeWidth = currentShape.Blocks.Max(block => block.X) - currentShape.Blocks.Min(block => block.X) + 1;
-            int startX = (Board.BoardWidth - shapeWidth) / 2;
-            int startY = -currentShape.Blocks.Min(block => block.Y);
+            // Calculate the width and the leftmost position of the shape
+            int minX = currentShape.Blocks.Min(block => block.X);
+            int maxX = currentShape.Blocks.Max(block => block.X);
+            int shapeWidth = maxX - minX + 1;
 
+            // Center the shape horizontally
+            int startX = (Board.BoardWidth - shapeWidth) / 2 - minX;
+
+            // Calculate the Y offset to start the shape above the board
+            int minY = currentShape.Blocks.Min(block => block.Y);
+            int startY = -minY;
+
+            // Assign the position to each block of the shape
             foreach (var block in currentShape.Blocks)
             {
                 block.X += startX;
@@ -53,11 +62,14 @@ namespace FormTetris
             }
 
             // Check if any block of the new shape is colliding
-            if (currentShape.Blocks.Any(block => board.IsPositionOccupied(block.X, block.Y)))
+            if (currentShape.Blocks.Any(block => board.IsPositionOccupied(block.X, block.Y + 1)))
             {
+                // If there's a collision when the shape should be in the initial position,
+                // then it's game over because the spawning area is blocked.
                 isGameOver = true;
             }
         }
+
 
         private bool CanMoveShape(int deltaX, int deltaY)
         {
@@ -71,7 +83,11 @@ namespace FormTetris
         {
             board.PlaceShape(currentShape);
             board.CheckLines();
-            InitializeNewShape();
+            if (!isGameOver)
+            {
+                InitializeNewShape();
+            }
+
         }
 
         public void MoveShapeDown()

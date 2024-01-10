@@ -1,19 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace FormTetris
 {
     public class Shape
     {
+        public string ShapeType { get; private set; }
         private List<Block> blocks;
         private int rotationIndex;
         private List<List<Block>> orientations;
 
         public List<Block> Blocks => new List<Block>(blocks);
 
-        public Shape(List<List<Block>> shapeOrientations)
+        public Shape(string shapeType, List<List<Block>> shapeOrientations)
         {
+            ShapeType = shapeType;
             orientations = shapeOrientations;
             rotationIndex = 0;
             blocks = new List<Block>(orientations[rotationIndex]);
@@ -50,28 +51,39 @@ namespace FormTetris
 
         public void Rotate(bool clockwise, Board board)
         {
-            var originalBlocks = new List<Block>(Blocks); // Save current state
-            int newRotationIndex = clockwise
-                ? (rotationIndex + 1) % orientations.Count
-                : (rotationIndex - 1 + orientations.Count) % orientations.Count;
+            DebugForm.Instance.Log("Attempting to rotate shape.");
 
-            var currentReferenceBlock = blocks[0]; // Reference block for current orientation
-            var newReferenceBlock = orientations[newRotationIndex][0]; // Reference block for new orientation
+            int currentRotationState = rotationIndex;
+            int newRotationState = clockwise ? (rotationIndex + 1) % orientations.Count
+                                             : (rotationIndex - 1 + orientations.Count) % orientations.Count;
 
-            List<Block> newOrientation = orientations[newRotationIndex]
-                .Select(b => new Block(b.X - newReferenceBlock.X + currentReferenceBlock.X,
-                                       b.Y - newReferenceBlock.Y + currentReferenceBlock.Y)).ToList();
+            var wallKickDataDictionary = Shapes.GetSrsData()[this.ShapeType];
+            var rotationKey = (currentRotationState, newRotationState);
 
-            if (IsValidPosition(newOrientation, board))
+            if (wallKickDataDictionary.TryGetValue(rotationKey, out var wallKickData))
             {
-                rotationIndex = newRotationIndex;
-                blocks = newOrientation;
+                DebugForm.Instance.Log($"Rotation data found for {ShapeType} from {currentRotationState} to {newRotationState}.");
+                foreach (var point in wallKickData)
+                {
+                    var translatedBlocks = Blocks.Select(block => new Block(block.X + point.X, block.Y + point.Y)).ToList();
+                    if (IsValidPosition(translatedBlocks, board))
+                    {
+                        blocks = translatedBlocks;
+                        rotationIndex = newRotationState;
+                        DebugForm.Instance.Log("Rotation successful.");
+                        return;
+                    }
+                }
+                DebugForm.Instance.Log("Rotation failed. No valid position found.");
             }
-            else if (!TryWallKick(newOrientation, board))
+            else
             {
-                blocks = originalBlocks; // Revert if wall kick fails
+                DebugForm.Instance.Log($"No rotation data found for {ShapeType} from {currentRotationState} to {newRotationState}.");
             }
         }
+
+
+
 
 
         private bool IsValidPosition(List<Block> newOrientation, Board board)

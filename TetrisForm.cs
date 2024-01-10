@@ -11,6 +11,7 @@ namespace FormTetris
         private GameInitializer gameInitializer;
         private FormWindowConfiguration windowConfig;
         private FormViewManager viewManager;
+        private DebugForm debugForm;
 
         public TetrisForm()
         {
@@ -54,6 +55,20 @@ namespace FormTetris
             if (e.KeyCode == Keys.F11)
             {
                 windowConfig.ToggleFullScreen();
+                return;
+            }
+
+            if (e.KeyCode == Keys.F12)
+            {
+                if (debugForm == null || debugForm.IsDisposed)
+                {
+                    debugForm = DebugForm.Instance;
+                    debugForm.Show(this);  // Show DebugForm as a child of the main form
+                }
+                else
+                {
+                    debugForm.Focus();  // Bring the debug form to front if it's already open
+                }
                 return;
             }
 

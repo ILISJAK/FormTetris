@@ -68,11 +68,15 @@ namespace FormTetris
 
         private void DrawCurrentShape(Graphics graphics)
         {
+            // Use a conditional operator to decide the brush color based on the game's state.
+            Brush shapeBrush = game.IsGameOver ? Brushes.Gray : Brushes.Blue;
+
             foreach (var block in game.CurrentShape.Blocks)
             {
-                DrawBlock(graphics, block.X, block.Y, Brushes.Blue);
+                DrawBlock(graphics, block.X, block.Y, shapeBrush);
             }
         }
+
 
         private void DrawBlock(Graphics graphics, int x, int y, Brush brush)
         {
