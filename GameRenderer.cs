@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace FormTetris
@@ -8,6 +9,8 @@ namespace FormTetris
         private Game game;
         private int blockSize;
         private Point gameAreaStart;
+        private Dictionary<Point, DateTime> blockDrawTimes = new Dictionary<Point, DateTime>();
+        private readonly TimeSpan glowDuration = TimeSpan.FromSeconds(0.5);
 
         public GameRenderer(Game game, int blockSize, Point gameAreaStart)
         {
@@ -58,9 +61,11 @@ namespace FormTetris
             {
                 for (int y = 0; y < game.Board.BoardHeight; y++)
                 {
-                    if (game.Board.IsPositionOccupied(x, y))
+                    Color? blockColor = game.Board.GetBlockColor(x, y); // Assume GetBlockColor returns Color? (nullable Color)
+                    if (blockColor.HasValue)
                     {
-                        DrawBlock(graphics, x, y, Brushes.Gray);
+                        Brush brush = new SolidBrush(blockColor.Value);
+                        DrawBlock(graphics, x, y, brush);
                     }
                 }
             }
@@ -68,15 +73,18 @@ namespace FormTetris
 
         private void DrawCurrentShape(Graphics graphics)
         {
-            // Use a conditional operator to decide the brush color based on the game's state.
-            Brush shapeBrush = game.IsGameOver ? Brushes.Gray : Brushes.Blue;
-
-            foreach (var block in game.CurrentShape.Blocks)
+            // Only draw the current shape if the game is not over
+            if (!game.IsGameOver)
             {
-                DrawBlock(graphics, block.X, block.Y, shapeBrush);
+                var shapeColor = game.CurrentShape.ShapeColor;
+                Brush shapeBrush = new SolidBrush(shapeColor);
+
+                foreach (var block in game.CurrentShape.Blocks)
+                {
+                    DrawBlock(graphics, block.X, block.Y, shapeBrush);
+                }
             }
         }
-
 
         private void DrawBlock(Graphics graphics, int x, int y, Brush brush)
         {

@@ -18,6 +18,7 @@ namespace FormTetris
             InitializeComponent();
             this.DoubleBuffered = true;
             this.BackColor = Color.Black; // Set the background color
+            this.Text = "FormTetris";
 
             gameInitializer = new GameInitializer(this.ClientSize, Invalidate);
             gameInitializer.Initialize(out gameRenderer);

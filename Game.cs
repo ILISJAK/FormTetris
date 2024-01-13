@@ -7,6 +7,7 @@ namespace FormTetris
         private Board board;
         private Shape currentShape;
         private bool isGameOver;
+        ShapeBag bag;
 
         public Board Board => board;
         public Shape CurrentShape => currentShape;
@@ -15,6 +16,7 @@ namespace FormTetris
         public Game()
         {
             board = new Board();
+            bag = new ShapeBag();
             Start();
         }
 
@@ -25,12 +27,19 @@ namespace FormTetris
 
         public void Update()
         {
-            if (isGameOver) return;
+            if (isGameOver)
+            {
+                return;
+            }
 
             if (!CanMoveShape(0, 1))
             {
                 PlaceShapeAndCheckLines();
                 isGameOver = CheckGameOver();
+                if (isGameOver)
+                {
+                    return;
+                }
             }
             else
             {
@@ -40,7 +49,8 @@ namespace FormTetris
 
         private void InitializeNewShape()
         {
-            currentShape = Shapes.GetRandomShape();
+            if (isGameOver) { return; }
+            currentShape = bag.GetNextShape(); // placeholder since we are only examining this shape
 
             // Calculate the width and the leftmost position of the shape
             int minX = currentShape.Blocks.Min(block => block.X);
@@ -50,19 +60,20 @@ namespace FormTetris
             // Center the shape horizontally
             int startX = (Board.BoardWidth - shapeWidth) / 2 - minX;
 
-            // Calculate the Y offset to start the shape above the board
+            // Adjust the Y offset to start the shape from the second-highest row
             int minY = currentShape.Blocks.Min(block => block.Y);
-            int startY = -minY;
+            int shapeHeight = currentShape.Blocks.Max(block => block.Y) - minY + 1;
+            int startY = 2 - shapeHeight; // This will place the shape's lowest block at row 1
 
             // Assign the position to each block of the shape
             foreach (var block in currentShape.Blocks)
             {
                 block.X += startX;
-                block.Y += startY;
+                block.Y += startY; // Adjust the Y position of the blocks
             }
 
-            // Check if any block of the new shape is colliding
-            if (currentShape.Blocks.Any(block => board.IsPositionOccupied(block.X, block.Y + 1)))
+            // Check if any block of the new shape is colliding at the new starting position
+            if (currentShape.Blocks.Any(block => board.IsPositionOccupied(block.X, block.Y)))
             {
                 // If there's a collision when the shape should be in the initial position,
                 // then it's game over because the spawning area is blocked.
@@ -146,11 +157,14 @@ namespace FormTetris
 
         private bool CheckGameOver()
         {
-            // Assuming IsPositionOccupied checks if a specific position is occupied
             for (int x = 0; x < board.BoardWidth; x++)
             {
-                if (board.IsPositionOccupied(x, 0)) // Check the top row for a game over condition
+                if (board.IsPositionOccupied(x, 0))
+                {
+                    // Clear the current shape to make sure it doesn't appear on the board after game over
+                    currentShape = null;
                     return true;
+                }
             }
             return false;
         }

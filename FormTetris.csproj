@@ -61,7 +61,14 @@
     <Compile Include="GameRenderer.cs" />
     <Compile Include="InputManager.cs" />
     <Compile Include="Shape.cs" />
-    <Compile Include="Shapes.cs" />
+    <Compile Include="ShapeBag.cs" />
+    <Compile Include="ShapeI.cs" />
+    <Compile Include="ShapeJ.cs" />
+    <Compile Include="ShapeL.cs" />
+    <Compile Include="ShapeO.cs" />
+    <Compile Include="ShapeS.cs" />
+    <Compile Include="ShapeZ.cs" />
+    <Compile Include="ShapeT.cs" />
     <Compile Include="TetrisForm.cs">
       <SubType>Form</SubType>
     </Compile>

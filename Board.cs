@@ -1,4 +1,6 @@
-﻿namespace FormTetris
+﻿using System.Drawing;
+
+namespace FormTetris
 {
     public class Board
     {
@@ -10,10 +12,12 @@
         public int BoardHeight => Height;
 
         private Block[,] grid;
+        private readonly Color?[,] blocks;
 
         public Board()
         {
             grid = new Block[Width, Height];
+            blocks = new Color?[Width, Height];
             InitializeGrid();
         }
 
@@ -34,11 +38,17 @@
             {
                 if (block.X >= 0 && block.X < Width && block.Y >= 0 && block.Y < Height)
                 {
-                    grid[block.X, block.Y] = block;
+                    grid[block.X, block.Y] = block; // Add this line to update grid for collision detection
+                    blocks[block.X, block.Y] = shape.ShapeColor;
                 }
             }
         }
 
+
+        public Color? GetBlockColor(int x, int y)
+        {
+            return blocks[x, y];
+        }
 
         // Method to check for line completion
         public void CheckLines()
@@ -69,9 +79,11 @@
         {
             for (int x = 0; x < Width; x++)
             {
-                grid[x, y] = null;
+                grid[x, y] = null; // This will clear the blocks for collision detection
+                blocks[x, y] = null; // Also clear the colors
             }
         }
+
 
         private void ShiftLinesDown(int startingY)
         {
@@ -79,10 +91,18 @@
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    grid[x, y] = grid[x, y - 1];
+                    grid[x, y] = grid[x, y - 1]; // Shift the block objects down
+                    blocks[x, y] = blocks[x, y - 1]; // Shift the colors down
                 }
             }
+            // Don't forget to clear the top line after shifting down
+            for (int x = 0; x < Width; x++)
+            {
+                grid[x, 0] = null;
+                blocks[x, 0] = null;
+            }
         }
+
 
 
         // Additional utilities

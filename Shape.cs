@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Drawing;
 
 namespace FormTetris
 {
@@ -9,15 +9,17 @@ namespace FormTetris
         private List<Block> blocks;
         private int rotationIndex;
         private List<List<Block>> orientations;
+        public Color ShapeColor { get; set; }
 
-        public List<Block> Blocks => new List<Block>(blocks);
+        public List<Block> Blocks => blocks;
 
-        public Shape(string shapeType, List<List<Block>> shapeOrientations)
+        public Shape(string shapeType, List<List<Block>> shapeOrientations, Color color)
         {
             ShapeType = shapeType;
             orientations = shapeOrientations;
             rotationIndex = 0;
             blocks = new List<Block>(orientations[rotationIndex]);
+            ShapeColor = color;
         }
 
         public void ResetBlocks(List<Block> originalBlocks)
@@ -51,63 +53,44 @@ namespace FormTetris
 
         public void Rotate(bool clockwise, Board board)
         {
-            DebugForm.Instance.Log("Attempting to rotate shape.");
+            // Assuming the pivot is the second block in the list for simplicity
+            Block pivot = blocks[1];
+            List<Block> newPositions = new List<Block>();
 
-            int currentRotationState = rotationIndex;
-            int newRotationState = clockwise ? (rotationIndex + 1) % orientations.Count
-                                             : (rotationIndex - 1 + orientations.Count) % orientations.Count;
-
-            var wallKickDataDictionary = Shapes.GetSrsData()[this.ShapeType];
-            var rotationKey = (currentRotationState, newRotationState);
-
-            if (wallKickDataDictionary.TryGetValue(rotationKey, out var wallKickData))
+            // Calculate new positions based on rotation
+            foreach (var block in blocks)
             {
-                DebugForm.Instance.Log($"Rotation data found for {ShapeType} from {currentRotationState} to {newRotationState}.");
-                foreach (var point in wallKickData)
+                int relativeX = block.X - pivot.X;
+                int relativeY = block.Y - pivot.Y;
+
+                if (clockwise)
                 {
-                    var translatedBlocks = Blocks.Select(block => new Block(block.X + point.X, block.Y + point.Y)).ToList();
-                    if (IsValidPosition(translatedBlocks, board))
-                    {
-                        blocks = translatedBlocks;
-                        rotationIndex = newRotationState;
-                        DebugForm.Instance.Log("Rotation successful.");
-                        return;
-                    }
+                    // Clockwise rotation
+                    newPositions.Add(new Block(pivot.X + relativeY, pivot.Y - relativeX));
                 }
-                DebugForm.Instance.Log("Rotation failed. No valid position found.");
-            }
-            else
-            {
-                DebugForm.Instance.Log($"No rotation data found for {ShapeType} from {currentRotationState} to {newRotationState}.");
-            }
-        }
-
-
-
-
-
-        private bool IsValidPosition(List<Block> newOrientation, Board board)
-        {
-            return newOrientation.All(block => !board.IsPositionOccupied(block.X, block.Y) &&
-                                               block.X >= 0 && block.X < board.BoardWidth &&
-                                               block.Y < board.BoardHeight);
-        }
-
-        private bool TryWallKick(List<Block> newOrientation, Board board)
-        {
-            var wallKickTranslations = new List<(int x, int y)> { (-1, 0), (1, 0) };
-
-            foreach (var (x, y) in wallKickTranslations)
-            {
-                var movedOrientation = newOrientation.Select(block => new Block(block.X + x, block.Y + y)).ToList();
-                if (IsValidPosition(movedOrientation, board))
+                else
                 {
-                    blocks = movedOrientation;
-                    return true;
+                    // Counterclockwise rotation
+                    newPositions.Add(new Block(pivot.X - relativeY, pivot.Y + relativeX));
                 }
             }
 
-            return false; // Wall kick not possible
+            // Check for collisions with the board boundaries or other blocks
+            foreach (var pos in newPositions)
+            {
+                if (pos.X < 0 || pos.X >= board.BoardWidth || pos.Y < 0 || pos.Y >= board.BoardHeight ||
+                    board.IsPositionOccupied(pos.X, pos.Y))
+                {
+                    return; // Collision detected, so don't rotate
+                }
+            }
+
+            // If no collision, update blocks to their new positions
+            for (int i = 0; i < blocks.Count; i++)
+            {
+                blocks[i].X = newPositions[i].X;
+                blocks[i].Y = newPositions[i].Y;
+            }
         }
     }
 }
