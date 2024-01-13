@@ -47,5 +47,11 @@ namespace FormTetris
 
             return bag.Dequeue();
         }
+        public void Reset()
+        {
+            bag.Clear();
+            FillBag();
+        }
+
     }
 }

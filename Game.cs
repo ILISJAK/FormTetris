@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace FormTetris
 {
@@ -7,22 +9,61 @@ namespace FormTetris
         private Board board;
         private Shape currentShape;
         private bool isGameOver;
+        private bool isRunning;
         ShapeBag bag;
+
+        private Timer gameLoopTimer;
 
         public Board Board => board;
         public Shape CurrentShape => currentShape;
         public bool IsGameOver => isGameOver;
+        public bool IsRunning => isRunning;
+        private bool manualDropOccurred;
 
         public Game()
         {
             board = new Board();
             bag = new ShapeBag();
+            gameLoopTimer = new Timer();
+            gameLoopTimer.Interval = 1000 / 2;
+            gameLoopTimer.Tick += new EventHandler(GameLoop);
             Start();
+        }
+
+        private void GameLoop(object sender, EventArgs e)
+        {
+            Update();
         }
 
         public void Start()
         {
             InitializeNewShape();
+            Reset();
+            isRunning = true;
+            gameLoopTimer.Start();
+        }
+        public void Pause()
+        {
+            gameLoopTimer.Stop();
+            isRunning = false;
+        }
+
+        public void Resume()
+        {
+            if (!isGameOver)
+            {
+                gameLoopTimer.Start();
+                isRunning = true;
+            }
+        }
+
+        public void Reset()
+        {
+            board.ClearBoard();
+            bag.Reset();
+            InitializeNewShape();
+            isGameOver = false;
+            isRunning = false;
         }
 
         public void Update()
@@ -32,7 +73,7 @@ namespace FormTetris
                 return;
             }
 
-            if (!CanMoveShape(0, 1))
+            if (!manualDropOccurred && !CanMoveShape(0, 1))
             {
                 PlaceShapeAndCheckLines();
                 isGameOver = CheckGameOver();
@@ -41,11 +82,13 @@ namespace FormTetris
                     return;
                 }
             }
-            else
+            else if (!manualDropOccurred)
             {
                 MoveShapeDown();
             }
+            manualDropOccurred = false;
         }
+
 
         private void InitializeNewShape()
         {
@@ -142,13 +185,13 @@ namespace FormTetris
             if (CanMoveShape(0, 1))
             {
                 currentShape.MoveDown();
+                manualDropOccurred = true;
             }
             else
             {
                 PlaceShapeAndCheckLines();
             }
         }
-
 
         public void RotateShape(bool clockwise)
         {
@@ -163,6 +206,7 @@ namespace FormTetris
                 {
                     // Clear the current shape to make sure it doesn't appear on the board after game over
                     currentShape = null;
+                    isRunning = false;
                     return true;
                 }
             }

@@ -32,6 +32,10 @@ namespace FormTetris
 
         public void DrawGame(Graphics graphics)
         {
+            if (!game.IsRunning)
+            {
+                return;
+            }
             DrawBoardOutline(graphics);
             DrawBoard(graphics);
             DrawCurrentShape(graphics);

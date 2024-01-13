@@ -32,13 +32,25 @@ namespace FormTetris
             }
         }
 
+        public void ClearBoard()
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    grid[x, y] = null;
+                    blocks[x, y] = null;
+                }
+            }
+        }
+
         public void PlaceShape(Shape shape)
         {
             foreach (var block in shape.Blocks)
             {
                 if (block.X >= 0 && block.X < Width && block.Y >= 0 && block.Y < Height)
                 {
-                    grid[block.X, block.Y] = block; // Add this line to update grid for collision detection
+                    grid[block.X, block.Y] = block;
                     blocks[block.X, block.Y] = shape.ShapeColor;
                 }
             }

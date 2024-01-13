@@ -17,20 +17,23 @@ namespace FormTetris
         {
             InitializeComponent();
             this.DoubleBuffered = true;
+            this.KeyPreview = true;
             this.BackColor = Color.Black; // Set the background color
             this.Text = "FormTetris";
 
             gameInitializer = new GameInitializer(this.ClientSize, Invalidate);
             gameInitializer.Initialize(out gameRenderer);
 
-            // Update game renderer with initial form size
             gameRenderer.UpdateSize(this.ClientSize);
 
             inputManager = new InputManager(gameInitializer.Game, Invalidate);
             this.KeyDown += OnKeyDown;
 
             windowConfig = new FormWindowConfiguration(this, new Size(800, 600));
-            viewManager = new FormViewManager(this);
+            viewManager = new FormViewManager(this, gameInitializer.Game);
+            viewManager.UpdateLayout(this.ClientSize);
+
+            viewManager.ShowMainMenu();
 
             this.Resize += TetrisForm_Resize;
             SetAspectRatio();
@@ -40,6 +43,7 @@ namespace FormTetris
         {
             gameInitializer.UpdateFormSize(this.ClientSize);
             gameRenderer.UpdateSize(this.ClientSize);
+            viewManager.UpdateLayout(this.ClientSize);
             this.Invalidate();
         }
 
@@ -53,6 +57,10 @@ namespace FormTetris
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
+            if (e.KeyCode == Keys.Escape)
+            {
+                viewManager.TogglePause();
+            }
             if (e.KeyCode == Keys.F11)
             {
                 windowConfig.ToggleFullScreen();

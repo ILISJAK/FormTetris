@@ -7,7 +7,6 @@ public class GameInitializer
 {
     public Game Game { get; private set; }
     public Size DefaultSize { get; private set; }
-    private Timer logicTimer;
     private Timer renderTimer;
     private Action invalidateAction;
 
@@ -17,16 +16,12 @@ public class GameInitializer
         this.invalidateAction = invalidateAction;
         Game = new Game();
         Game.Start();
-        InitializeTimers();
+        InitializeRenderTimer();
     }
 
-    private void InitializeTimers()
+    private void InitializeRenderTimer()
     {
-        logicTimer = new Timer { Interval = 1000 };
-        logicTimer.Tick += (sender, e) => Game.Update();
-        logicTimer.Start();
-
-        renderTimer = new Timer { Interval = 1000 / 60 };
+        renderTimer = new Timer { Interval = 1000 / 60 }; // 60 FPS for rendering
         renderTimer.Tick += (sender, e) => invalidateAction();
         renderTimer.Start();
     }
@@ -39,8 +34,6 @@ public class GameInitializer
     public void UpdateFormSize(Size newSize)
     {
         DefaultSize = newSize;
-        // Assuming GameRenderer has a method to update its size based on the new form size
-        // renderer.UpdateSize(newSize);
         invalidateAction();
     }
 }
