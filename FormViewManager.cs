@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace FormTetris
@@ -40,6 +39,7 @@ namespace FormTetris
             SetupMainMenu();
             SetupHelpPanel();
             SetupPausePanel();
+            SetupOptionsPanel();
 
             // Initially, show the main menu
             ShowMainMenu();
@@ -171,17 +171,25 @@ namespace FormTetris
             mainMenuPanel.Controls.Add(flowLayout);
 
             // Center the flowLayout within mainMenuPanel
-            CenterFlowLayoutInParent();
+            CenterFlowLayoutInParent(mainMenuPanel);
         }
 
-        public void CenterFlowLayoutInParent()
+        public void CenterFlowLayoutInParent(Panel panel)
         {
-            // Assuming there's only one FlowLayoutPanel in mainMenuPanel.Controls
-            var flowLayout = mainMenuPanel.Controls.OfType<FlowLayoutPanel>().FirstOrDefault();
-            if (flowLayout != null)
+            foreach (var control in panel.Controls)
             {
-                flowLayout.Left = (mainMenuPanel.Width - flowLayout.PreferredSize.Width) / 2;
-                flowLayout.Top = (mainMenuPanel.Height - flowLayout.PreferredSize.Height) / 2;
+                if (control is FlowLayoutPanel flowLayout)
+                {
+                    // Calculate the preferred size based on its contents
+                    var preferredSize = flowLayout.GetPreferredSize(new Size(panel.Width, panel.Height));
+
+                    // Set the size explicitly instead of relying on AutoSize
+                    flowLayout.Size = preferredSize;
+
+                    // Center the flowLayout within its parent panel
+                    flowLayout.Left = (panel.ClientSize.Width - preferredSize.Width) / 2;
+                    flowLayout.Top = (panel.ClientSize.Height - preferredSize.Height) / 2;
+                }
             }
         }
 
@@ -189,7 +197,14 @@ namespace FormTetris
         public void UpdateLayout(Size newSize)
         {
             mainMenuPanel.Size = newSize;
-            CenterFlowLayoutInParent();
+            helpPanel.Size = newSize;
+            pausePanel.Size = newSize;
+            optionsPanel.Size = newSize;
+
+            CenterFlowLayoutInParent(mainMenuPanel);
+            CenterFlowLayoutInParent(helpPanel);
+            CenterFlowLayoutInParent(pausePanel);
+            CenterFlowLayoutInParent(optionsPanel);
         }
 
         // Helper method to create a button with common properties
@@ -208,70 +223,125 @@ namespace FormTetris
 
         private void SetupHelpPanel()
         {
-            // Clear existing controls in the help panel
             helpPanel.Controls.Clear();
 
-            // Create and configure the text for the keybinds
-            var keybindsText = new TextBox();
-            keybindsText.Multiline = true;
-            keybindsText.Text = "Keybinds:\r\n" +
-                               "Left Arrow: Move Left\r\n" +
-                               "Right Arrow: Move Right\r\n" +
-                               "Down Arrow: Drop Shape\r\n" +
-                               "Q: Rotate Shape Counter-clockwise\r\n" +
-                               "E: Rotate Shape Clockwise";
-            keybindsText.Font = buttonFont; // Use the same font as buttons
-            keybindsText.ReadOnly = true;
-            keybindsText.Size = new Size(400, 200);
-            keybindsText.Location = new Point((form.ClientSize.Width - keybindsText.Width) / 2, 100);
-
-            // Create a button to return to the main menu
-            var backButton = new Button { Text = "Back to Main Menu", Size = buttonSize, ForeColor = textColor, Font = buttonFont };
-            backButton.Location = new Point((form.ClientSize.Width - buttonSize.Width) / 2, keybindsText.Bottom + 20);
-            backButton.Click += (sender, e) => ShowMainMenu(); // Return to the main menu when clicked
-
-            // Add controls to the help panel
-            helpPanel.Controls.Add(keybindsText);
-            helpPanel.Controls.Add(backButton);
-        }
-        private void SetupPausePanel()
-        {
-            pausePanel = new Panel
+            FlowLayoutPanel helpLayout = new FlowLayoutPanel
             {
-                Dock = DockStyle.Fill,
-                BackColor = Color.FromArgb(128, 0, 0, 0), // Semi-transparent black
-                Visible = false
+                // Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.TopDown,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink
             };
 
-            // Create and configure buttons for the pause panel
-            var resumeButton = new Button { Text = "Resume", Size = buttonSize, ForeColor = textColor, Font = buttonFont };
-            resumeButton.Location = new Point((form.ClientSize.Width - buttonSize.Width) / 2, 100);
+            var controlsLabel = new Label
+            {
+                Text = "Controls",
+                TextAlign = ContentAlignment.TopCenter,
+                Font = buttonFont,
+                ForeColor = textColor,
+                AutoSize = true
+            };
+
+            var keybindsTextBox = new TextBox
+            {
+                Multiline = true,
+                Text = "←: Move Left\r\n→: Move Right\r\n" +
+                       "↓: Drop Shape\r\nSPACE: Fast Drop\r\nQ: Rotate Counter-clockwise\r\n" +
+                       "E: Rotate Clockwise\r\nF11: Toggle Fullscreen\r\nF12: Debug Window",
+                ReadOnly = true,
+                Size = new Size(300, 300), // Set the size as per your requirement
+                Font = buttonFont,
+                ForeColor = textColor,
+                AutoSize = true, // Set AutoSize to false
+                ScrollBars = ScrollBars.Vertical // Add vertical scrollbars if necessary
+            };
+
+            var backButton = CreateButton("Back to Main Menu");
+            backButton.Click += (sender, e) => ShowMainMenu();
+
+            helpLayout.Controls.Add(controlsLabel);
+            helpLayout.Controls.Add(keybindsTextBox);
+            helpLayout.Controls.Add(backButton);
+
+            helpPanel.Controls.Add(helpLayout);
+            CenterFlowLayoutInParent(helpPanel); // Center the layout in the panel
+        }
+
+        private void SetupPausePanel()
+        {
+            if (pausePanel == null)
+            {
+                pausePanel = new Panel
+                {
+                    // Dock = DockStyle.Fill,
+                    BackColor = Color.FromArgb(128, 0, 0, 0), // Semi-transparent black
+                    Visible = false
+                };
+                form.Controls.Add(pausePanel); // Ensure pausePanel is added to the form
+            }
+            else
+            {
+                pausePanel.Controls.Clear();
+            }
+
+            FlowLayoutPanel pauseLayout = new FlowLayoutPanel
+            {
+                // Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.TopDown,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink
+            };
+
+            var resumeButton = CreateButton("Resume");
             resumeButton.Click += (sender, e) =>
             {
                 DebugForm.Instance.Log("Resume button clicked.");
                 TogglePause();
             };
 
-            var restartButton = new Button { Text = "Restart", Size = buttonSize, ForeColor = textColor, Font = buttonFont };
-            restartButton.Location = new Point((form.ClientSize.Width - buttonSize.Width) / 2, resumeButton.Bottom + 10);
+            var restartButton = CreateButton("Restart");
             restartButton.Click += (sender, e) => StartNewGame();
 
-            var quitButton = new Button { Text = "Quit to Main Menu", Size = buttonSize, ForeColor = textColor, Font = buttonFont };
-            quitButton.Location = new Point((form.ClientSize.Width - buttonSize.Width) / 2, restartButton.Bottom + 10);
+            var quitButton = CreateButton("Quit to Main Menu");
             quitButton.Click += (sender, e) =>
             {
                 DebugForm.Instance.Log("Quit to Main Menu button clicked.");
-                ShowMainMenu(); // Directly call ShowMainMenu
+                ShowMainMenu();
             };
 
-            // Add buttons to the pause panel
-            pausePanel.Controls.Add(resumeButton);
-            pausePanel.Controls.Add(restartButton);
-            pausePanel.Controls.Add(quitButton);
+            pauseLayout.Controls.Add(resumeButton);
+            pauseLayout.Controls.Add(restartButton);
+            pauseLayout.Controls.Add(quitButton);
 
-            // Add the pause panel to the form
-            form.Controls.Add(pausePanel);
-            form.Controls.SetChildIndex(pausePanel, 0); // Ensure pause panel is on top
+            pausePanel.Controls.Add(pauseLayout);
+            CenterFlowLayoutInParent(pausePanel); // Center the layout in the panel
         }
+
+        private void SetupOptionsPanel()
+        {
+            optionsPanel.Controls.Clear();
+
+            FlowLayoutPanel optionsLayout = new FlowLayoutPanel
+            {
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                Padding = new Padding(0) // Adjust padding as needed
+            };
+
+            // Create the back button and add it to the layout
+            var backButton = CreateButton("Back to Main Menu");
+            backButton.Click += (sender, e) => ShowMainMenu();
+
+            optionsLayout.Controls.Add(backButton);
+
+            // Add the optionsLayout to the options panel
+            optionsPanel.Controls.Add(optionsLayout);
+
+            // Center the optionsLayout within the optionsPanel
+            CenterFlowLayoutInParent(optionsPanel);
+        }
+
     }
 }

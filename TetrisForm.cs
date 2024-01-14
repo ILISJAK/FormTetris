@@ -12,7 +12,6 @@ namespace FormTetris
         private FormWindowConfiguration windowConfig;
         private FormViewManager viewManager;
         private DebugForm debugForm;
-
         public TetrisForm()
         {
             InitializeComponent();
@@ -24,19 +23,24 @@ namespace FormTetris
             gameInitializer = new GameInitializer(this.ClientSize, Invalidate);
             gameInitializer.Initialize(out gameRenderer);
 
-            gameRenderer.UpdateSize(this.ClientSize);
-
             inputManager = new InputManager(gameInitializer.Game, Invalidate);
             this.KeyDown += OnKeyDown;
 
             windowConfig = new FormWindowConfiguration(this, new Size(800, 600));
             viewManager = new FormViewManager(this, gameInitializer.Game);
-            viewManager.UpdateLayout(this.ClientSize);
 
             viewManager.ShowMainMenu();
 
             this.Resize += TetrisForm_Resize;
+            this.Load += TetrisForm_Load;
             SetAspectRatio();
+        }
+
+        private void TetrisForm_Load(object sender, EventArgs e)
+        {
+            gameRenderer.UpdateSize(this.ClientSize);
+            viewManager.UpdateLayout(this.ClientSize);
+            viewManager.ShowMainMenu();
         }
 
         private void TetrisForm_Resize(object sender, EventArgs e)

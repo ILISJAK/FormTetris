@@ -193,6 +193,15 @@ namespace FormTetris
             }
         }
 
+        public void FastDrop()
+        {
+            while (CanMoveShape(0, 1))
+            {
+                currentShape.MoveDown();
+            }
+            PlaceShapeAndCheckLines();
+        }
+
         public void RotateShape(bool clockwise)
         {
             currentShape.Rotate(clockwise, board);
