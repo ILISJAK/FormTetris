@@ -39,6 +39,7 @@ namespace FormTetris
             DrawBoardOutline(graphics);
             DrawBoard(graphics);
             DrawCurrentShape(graphics);
+            DrawGhostShape(graphics, game.GhostShape);
         }
 
         public void UpdateBlockSizeAndStart(int blockSize, Point gameAreaStart)
@@ -86,6 +87,20 @@ namespace FormTetris
                 foreach (var block in game.CurrentShape.Blocks)
                 {
                     DrawBlock(graphics, block.X, block.Y, shapeBrush);
+                }
+            }
+        }
+
+        public void DrawGhostShape(Graphics graphics, Shape ghostShape)
+        {
+            if (ghostShape != null)
+            {
+                Color ghostColor = Color.FromArgb(128, ghostShape.ShapeColor); // 128 is the alpha value (0-255)
+                Brush ghostBrush = new SolidBrush(ghostColor);
+
+                foreach (var block in ghostShape.Blocks)
+                {
+                    DrawBlock(graphics, block.X, block.Y, ghostBrush); // Pass individual x and y coordinates
                 }
             }
         }

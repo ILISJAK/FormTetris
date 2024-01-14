@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace FormTetris
 {
@@ -20,6 +21,14 @@ namespace FormTetris
             rotationIndex = 0;
             blocks = new List<Block>(orientations[rotationIndex]);
             ShapeColor = color;
+        }
+
+        public Shape Clone()
+        {
+            Shape clonedShape = new Shape(ShapeType, orientations, ShapeColor);
+            clonedShape.blocks = new List<Block>(blocks.Select(block => new Block(block.X, block.Y)));
+            clonedShape.rotationIndex = rotationIndex;
+            return clonedShape;
         }
 
         public void ResetBlocks(List<Block> originalBlocks)

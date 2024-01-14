@@ -70,6 +70,9 @@ namespace FormTetris
                 case Keys.E:
                     game.RotateShape(true);
                     break;
+                case Keys.Space:
+                    game.FastDrop();
+                    break;
             }
 
             actionTimer.Start();

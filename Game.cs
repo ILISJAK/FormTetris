@@ -8,12 +8,14 @@ namespace FormTetris
     {
         private Board board;
         private Shape currentShape;
+        private Shape ghostShape;
         private bool isGameOver;
         private bool isRunning;
-        ShapeBag bag;
+        private ShapeBag bag;
 
         private Timer gameLoopTimer;
 
+        public Shape GhostShape => ghostShape;
         public Board Board => board;
         public Shape CurrentShape => currentShape;
         public bool IsGameOver => isGameOver;
@@ -89,6 +91,17 @@ namespace FormTetris
             manualDropOccurred = false;
         }
 
+        private void UpdateGhostShape()
+        {
+            // Clone the current shape to create a ghost shape
+            ghostShape = currentShape.Clone();
+
+            // Move the ghost shape down until it can't move any further
+            while (CanMoveShape(0, 1, ghostShape))
+            {
+                ghostShape.MoveDown();
+            }
+        }
 
         private void InitializeNewShape()
         {
@@ -133,6 +146,15 @@ namespace FormTetris
                 block.Y + deltaY < board.BoardHeight);
         }
 
+        // overload for ghostshape
+        private bool CanMoveShape(int deltaX, int deltaY, Shape shape)
+        {
+            return shape.Blocks.All(block =>
+                !board.IsPositionOccupied(block.X + deltaX, block.Y + deltaY) &&
+                block.X + deltaX >= 0 && block.X + deltaX < board.BoardWidth &&
+                block.Y + deltaY < board.BoardHeight);
+        }
+
         private void PlaceShapeAndCheckLines()
         {
             board.PlaceShape(currentShape);
@@ -149,6 +171,7 @@ namespace FormTetris
             if (CanMoveShape(0, 1))
             {
                 currentShape.MoveDown();
+                UpdateGhostShape();
             }
             else
             {
@@ -161,6 +184,7 @@ namespace FormTetris
             if (CanMoveShape(-1, 0))
             {
                 currentShape.MoveLeft();
+                UpdateGhostShape();
                 if (!CanMoveShape(0, 1))  // Check for collision immediately after moving
                 {
                     PlaceShapeAndCheckLines();
@@ -173,6 +197,7 @@ namespace FormTetris
             if (CanMoveShape(1, 0))
             {
                 currentShape.MoveRight();
+                UpdateGhostShape();
                 if (!CanMoveShape(0, 1))  // Check for collision immediately after moving
                 {
                     PlaceShapeAndCheckLines();
@@ -205,6 +230,7 @@ namespace FormTetris
         public void RotateShape(bool clockwise)
         {
             currentShape.Rotate(clockwise, board);
+            UpdateGhostShape();
         }
 
         private bool CheckGameOver()

@@ -101,5 +101,22 @@ namespace FormTetris
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             gameRenderer.DrawGame(e.Graphics);
         }
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            // Capture the spacebar key press and handle it for FastDrop
+            if (keyData == Keys.Space)
+            {
+                if (!viewManager.IsPausePanelVisible())
+                {
+                    gameInitializer.Game.FastDrop();
+                    Invalidate(); // Redraw the form to show changes
+                    return true; // Indicate that the key press has been handled
+                }
+            }
+
+            // Call the base class method to handle other command keys
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
     }
 }
