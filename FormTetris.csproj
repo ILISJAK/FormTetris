@@ -58,46 +58,46 @@
   <ItemGroup>
     <Compile Include="Block.cs" />
     <Compile Include="Board.cs" />
-    <Compile Include="DebugForm.cs">
+    <Compile Include="Views\DebugForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DebugForm.Designer.cs">
+    <Compile Include="Views\DebugForm.Designer.cs">
       <DependentUpon>DebugForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormViewManager.cs" />
-    <Compile Include="FormWindowConfiguration.cs" />
-    <Compile Include="Game.cs" />
-    <Compile Include="GameInitializer.cs" />
-    <Compile Include="GameRenderer.cs" />
-    <Compile Include="InputManager.cs" />
-    <Compile Include="Match.cs" />
+    <Compile Include="Controllers\FormViewManager.cs" />
+    <Compile Include="config\FormWindowConfiguration.cs" />
+    <Compile Include="Controllers\Game.cs" />
+    <Compile Include="Controllers\GameInitializer.cs" />
+    <Compile Include="Controllers\GameRenderer.cs" />
+    <Compile Include="Controllers\InputManager.cs" />
+    <Compile Include="Models\Match.cs" />
     <Compile Include="Migrations\202401141748144_InitialCreate.cs" />
     <Compile Include="Migrations\202401141748144_InitialCreate.designer.cs">
       <DependentUpon>202401141748144_InitialCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Player.cs" />
-    <Compile Include="Score.cs" />
-    <Compile Include="ScoreManager.cs" />
-    <Compile Include="Shape.cs" />
-    <Compile Include="ShapeBag.cs" />
-    <Compile Include="ShapeI.cs" />
-    <Compile Include="ShapeJ.cs" />
-    <Compile Include="ShapeL.cs" />
-    <Compile Include="ShapeO.cs" />
-    <Compile Include="ShapeS.cs" />
-    <Compile Include="ShapeZ.cs" />
-    <Compile Include="ShapeT.cs" />
+    <Compile Include="Models\Player.cs" />
+    <Compile Include="Models\Score.cs" />
+    <Compile Include="Controllers\ScoreManager.cs" />
+    <Compile Include="Shapes\Shape.cs" />
+    <Compile Include="Shapes\ShapeBag.cs" />
+    <Compile Include="Shapes\ShapeI.cs" />
+    <Compile Include="Shapes\ShapeJ.cs" />
+    <Compile Include="Shapes\ShapeL.cs" />
+    <Compile Include="Shapes\ShapeO.cs" />
+    <Compile Include="Shapes\ShapeS.cs" />
+    <Compile Include="Shapes\ShapeZ.cs" />
+    <Compile Include="Shapes\ShapeT.cs" />
     <Compile Include="TetrisDbContext.cs" />
-    <Compile Include="TetrisForm.cs">
+    <Compile Include="Views\TetrisForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TetrisForm.Designer.cs">
+    <Compile Include="Views\TetrisForm.Designer.cs">
       <DependentUpon>TetrisForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="DebugForm.resx">
+    <EmbeddedResource Include="Views\DebugForm.resx">
       <DependentUpon>DebugForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202401141748144_InitialCreate.resx">
@@ -126,6 +126,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
