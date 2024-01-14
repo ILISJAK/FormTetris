@@ -80,8 +80,22 @@ namespace FormTetris
 
         private void CalculateScore(int lines)
         {
-            // Add scoring logic here. This can vary depending on your scoring rules.
-            // Example: TotalScore += lines * 100;
+            // Basic scoring logic
+            switch (lines)
+            {
+                case 1:
+                    TotalScore += 40 * (Level + 1); // Single line
+                    break;
+                case 2:
+                    TotalScore += 100 * (Level + 1); // Double line
+                    break;
+                case 3:
+                    TotalScore += 300 * (Level + 1); // Triple line
+                    break;
+                case 4:
+                    TotalScore += 1200 * (Level + 1); // Tetris (4 lines)
+                    break;
+            }
         }
 
         private int CalculateTPM()

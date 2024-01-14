@@ -56,8 +56,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Block.cs" />
-    <Compile Include="Board.cs" />
+    <Compile Include="Controllers\UIInitializer.cs" />
+    <Compile Include="Data\Repositories\MatchRepository.cs" />
+    <Compile Include="Data\Repositories\PlayerRepository.cs" />
+    <Compile Include="Data\Repositories\ScoreRepository.cs" />
+    <Compile Include="GameObjects\Block.cs" />
+    <Compile Include="GameObjects\Board.cs" />
+    <Compile Include="Utilities\UIElementFactory.cs" />
+    <Compile Include="Utilities\UIEventHandlers.cs" />
     <Compile Include="Views\DebugForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -65,7 +71,7 @@
       <DependentUpon>DebugForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Controllers\FormViewManager.cs" />
-    <Compile Include="config\FormWindowConfiguration.cs" />
+    <Compile Include="Config\FormWindowConfiguration.cs" />
     <Compile Include="Controllers\Game.cs" />
     <Compile Include="Controllers\GameInitializer.cs" />
     <Compile Include="Controllers\GameRenderer.cs" />
@@ -79,16 +85,16 @@
     <Compile Include="Models\Player.cs" />
     <Compile Include="Models\Score.cs" />
     <Compile Include="Controllers\ScoreManager.cs" />
-    <Compile Include="Shapes\Shape.cs" />
-    <Compile Include="Shapes\ShapeBag.cs" />
-    <Compile Include="Shapes\ShapeI.cs" />
-    <Compile Include="Shapes\ShapeJ.cs" />
-    <Compile Include="Shapes\ShapeL.cs" />
-    <Compile Include="Shapes\ShapeO.cs" />
-    <Compile Include="Shapes\ShapeS.cs" />
-    <Compile Include="Shapes\ShapeZ.cs" />
-    <Compile Include="Shapes\ShapeT.cs" />
-    <Compile Include="TetrisDbContext.cs" />
+    <Compile Include="GameObjects\Shape.cs" />
+    <Compile Include="GameObjects\ShapeBag.cs" />
+    <Compile Include="GameObjects\ShapeI.cs" />
+    <Compile Include="GameObjects\ShapeJ.cs" />
+    <Compile Include="GameObjects\ShapeL.cs" />
+    <Compile Include="GameObjects\ShapeO.cs" />
+    <Compile Include="GameObjects\ShapeS.cs" />
+    <Compile Include="GameObjects\ShapeZ.cs" />
+    <Compile Include="GameObjects\ShapeT.cs" />
+    <Compile Include="Data\TetrisDbContext.cs" />
     <Compile Include="Views\TetrisForm.cs">
       <SubType>Form</SubType>
     </Compile>

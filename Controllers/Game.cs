@@ -12,6 +12,7 @@ namespace FormTetris
         private bool isGameOver;
         private bool isRunning;
         private ShapeBag bag;
+        private ScoreManager scoreManager;
 
         private Timer gameLoopTimer;
 
@@ -26,9 +27,11 @@ namespace FormTetris
         {
             board = new Board();
             bag = new ShapeBag();
+            scoreManager = new ScoreManager();
             gameLoopTimer = new Timer();
             gameLoopTimer.Interval = 1000 / 2;
             gameLoopTimer.Tick += new EventHandler(GameLoop);
+            board.LinesCleared += OnLinesCleared;
             Start();
         }
 
@@ -164,6 +167,15 @@ namespace FormTetris
                 InitializeNewShape();
             }
 
+        }
+
+        private void OnLinesCleared(int linesCleared)
+        {
+            if (linesCleared > 0)
+            {
+                scoreManager.LineCleared(linesCleared);
+                DebugForm.Instance.Log($"Lines cleared: {linesCleared}, Current score: {scoreManager.TotalScore}");
+            }
         }
 
         public void MoveShapeDown()

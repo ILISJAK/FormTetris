@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 namespace FormTetris
 {
@@ -7,12 +8,13 @@ namespace FormTetris
         private const int Width = 10;
         private const int Height = 20;
 
-        // Public properties to access Width and Height
         public int BoardWidth => Width;
         public int BoardHeight => Height;
 
         private Block[,] grid;
         private readonly Color?[,] blocks;
+
+        public event Action<int> LinesCleared;
 
         public Board()
         {
@@ -65,16 +67,20 @@ namespace FormTetris
         // Method to check for line completion
         public void CheckLines()
         {
+            int linesCleared = 0;
             for (int y = Height - 1; y >= 0; y--)
             {
                 if (IsLineComplete(y))
                 {
                     ClearLine(y);
                     ShiftLinesDown(y);
-                    y++; // Recheck the same line since they have shifted down
+                    y++;
+                    linesCleared++;
                 }
             }
+            LinesCleared?.Invoke(linesCleared);
         }
+
 
         // Helper methods
         private bool IsLineComplete(int y)
