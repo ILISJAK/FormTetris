@@ -1,7 +1,6 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
-using System.Windows.Forms;
+using System.Threading;
 
 namespace FormTetris
 {
@@ -14,7 +13,12 @@ namespace FormTetris
         private bool isRunning;
         private ShapeBag bag;
 
-        private readonly Timer gameLoopTimer;
+        private Thread gameLoopThread;
+        private bool gameLoopRunning;
+        private Stopwatch stopwatch;
+        private double deltaTime;
+        private double fallSpeed;
+
 
         public ScoreManager ScoreManager { get; private set; }
         public Shape GhostShape => ghostShape;
@@ -29,15 +33,30 @@ namespace FormTetris
             ScoreManager = ScoreManager.Instance;
             board = new Board();
             bag = new ShapeBag();
-            gameLoopTimer = new Timer();
-            gameLoopTimer.Interval = 1000 / 2;
-            gameLoopTimer.Tick += new EventHandler(GameLoop);
+            gameLoopThread = new Thread(new ThreadStart(GameLoop));
+            stopwatch = new Stopwatch();
             board.LinesCleared += OnLinesCleared;
+            fallSpeed = 1.0;
         }
 
-        private void GameLoop(object sender, EventArgs e)
+        private void GameLoop()
         {
-            Update();
+            stopwatch.Start();
+            long lastTime = stopwatch.ElapsedMilliseconds;
+
+            while (gameLoopRunning)
+            {
+                long currentTime = stopwatch.ElapsedMilliseconds;
+                deltaTime = (currentTime - lastTime) / 1000.0; // Convert milliseconds to seconds
+                lastTime = currentTime;
+
+                Update(deltaTime);
+
+                // Sleep to control the frame rate (60 FPS in this case)
+                Thread.Sleep(16);
+            }
+
+            stopwatch.Stop();
         }
 
         public void Start()
@@ -45,13 +64,19 @@ namespace FormTetris
             InitializeNewShape();
             Reset();
             isRunning = true;
-            gameLoopTimer.Start();
+            gameLoopRunning = true;
+            if (!gameLoopThread.IsAlive)
+            {
+                gameLoopThread = new Thread(new ThreadStart(GameLoop));
+            }
+            gameLoopThread.Start();
             ScoreManager.Instance.StartGame();
         }
+
         public void Pause()
         {
             Debug.WriteLine("Pausing game...");
-            gameLoopTimer.Stop();
+            gameLoopRunning = false;
             isRunning = false;
             ScoreManager.Instance.PauseGameTime();
         }
@@ -60,11 +85,18 @@ namespace FormTetris
         {
             if (!isGameOver)
             {
-                gameLoopTimer.Start();
+                if (gameLoopThread == null || !gameLoopThread.IsAlive)
+                {
+                    gameLoopRunning = true;
+                    gameLoopThread = new Thread(new ThreadStart(GameLoop));
+                    gameLoopThread.Start();
+                }
+
                 isRunning = true;
                 ScoreManager.Instance.ResumeGameTime();
             }
         }
+
 
         public void Reset()
         {
@@ -73,31 +105,33 @@ namespace FormTetris
             InitializeNewShape();
             isGameOver = false;
             isRunning = false;
+            gameLoopRunning = false;
             ScoreManager.Instance.Reset();
         }
 
-        public void Update()
+        private double timeSinceLastMove = 0;
+
+        public void Update(double deltaTime)
         {
             if (isGameOver)
             {
                 return;
             }
 
-            if (!manualDropOccurred && !CanMoveShape(0, 1))
+            timeSinceLastMove += deltaTime;
+
+            if (timeSinceLastMove >= fallSpeed)
             {
-                PlaceShapeAndCheckLines();
-                isGameOver = CheckGameOver();
-                if (isGameOver)
+                if (!manualDropOccurred)
                 {
-                    return;
+                    MoveShapeDown();
                 }
+                timeSinceLastMove = 0;
             }
-            else if (!manualDropOccurred)
-            {
-                MoveShapeDown();
-            }
+
             manualDropOccurred = false;
         }
+
 
         private void UpdateGhostShape()
         {
@@ -148,6 +182,8 @@ namespace FormTetris
 
         private bool CanMoveShape(int deltaX, int deltaY)
         {
+            if (currentShape == null)
+                return false;
             return currentShape.Blocks.All(block =>
                 !board.IsPositionOccupied(block.X + deltaX, block.Y + deltaY) &&
                 block.X + deltaX >= 0 && block.X + deltaX < board.BoardWidth &&
@@ -157,6 +193,8 @@ namespace FormTetris
         // overload for ghostshape
         private bool CanMoveShape(int deltaX, int deltaY, Shape shape)
         {
+            if (currentShape == null)
+                return false;
             return shape.Blocks.All(block =>
                 !board.IsPositionOccupied(block.X + deltaX, block.Y + deltaY) &&
                 block.X + deltaX >= 0 && block.X + deltaX < board.BoardWidth &&
@@ -167,12 +205,13 @@ namespace FormTetris
         {
             board.PlaceShape(currentShape);
             board.CheckLines();
+
+            isGameOver = CheckGameOver();
             if (!isGameOver)
             {
                 ScoreManager.Instance.TetrominoDropped();
                 InitializeNewShape();
             }
-
         }
 
         private void OnLinesCleared(int linesCleared)
@@ -258,6 +297,8 @@ namespace FormTetris
                 if (board.IsPositionOccupied(x, 0))
                 {
                     currentShape = null;
+                    ScoreManager.Instance.PauseGameTime();
+                    isGameOver = true;
                     isRunning = false;
                     return true;
                 }

@@ -48,6 +48,10 @@ namespace FormTetris
 
         public void PlaceShape(Shape shape)
         {
+            if (shape == null || shape.Blocks == null)
+            {
+                return;
+            }
             foreach (var block in shape.Blocks)
             {
                 if (block.X >= 0 && block.X < Width && block.Y >= 0 && block.Y < Height)
