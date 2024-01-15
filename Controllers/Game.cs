@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -12,10 +13,10 @@ namespace FormTetris
         private bool isGameOver;
         private bool isRunning;
         private ShapeBag bag;
-        private ScoreManager scoreManager;
 
-        private Timer gameLoopTimer;
+        private readonly Timer gameLoopTimer;
 
+        public ScoreManager ScoreManager { get; private set; }
         public Shape GhostShape => ghostShape;
         public Board Board => board;
         public Shape CurrentShape => currentShape;
@@ -25,14 +26,13 @@ namespace FormTetris
 
         public Game()
         {
+            ScoreManager = ScoreManager.Instance;
             board = new Board();
             bag = new ShapeBag();
-            scoreManager = new ScoreManager();
             gameLoopTimer = new Timer();
             gameLoopTimer.Interval = 1000 / 2;
             gameLoopTimer.Tick += new EventHandler(GameLoop);
             board.LinesCleared += OnLinesCleared;
-            Start();
         }
 
         private void GameLoop(object sender, EventArgs e)
@@ -46,11 +46,14 @@ namespace FormTetris
             Reset();
             isRunning = true;
             gameLoopTimer.Start();
+            ScoreManager.Instance.StartGame();
         }
         public void Pause()
         {
+            Debug.WriteLine("Pausing game...");
             gameLoopTimer.Stop();
             isRunning = false;
+            ScoreManager.Instance.PauseGameTime();
         }
 
         public void Resume()
@@ -59,6 +62,7 @@ namespace FormTetris
             {
                 gameLoopTimer.Start();
                 isRunning = true;
+                ScoreManager.Instance.ResumeGameTime();
             }
         }
 
@@ -69,6 +73,7 @@ namespace FormTetris
             InitializeNewShape();
             isGameOver = false;
             isRunning = false;
+            ScoreManager.Instance.Reset();
         }
 
         public void Update()
@@ -164,6 +169,7 @@ namespace FormTetris
             board.CheckLines();
             if (!isGameOver)
             {
+                ScoreManager.Instance.TetrominoDropped();
                 InitializeNewShape();
             }
 
@@ -173,8 +179,8 @@ namespace FormTetris
         {
             if (linesCleared > 0)
             {
-                scoreManager.LineCleared(linesCleared);
-                DebugForm.Instance.Log($"Lines cleared: {linesCleared}, Current score: {scoreManager.TotalScore}");
+                ScoreManager.Instance.LineCleared(linesCleared);
+                DebugForm.Instance.Log($"Lines cleared: {linesCleared}, Current score: {ScoreManager.Instance.TotalScore}");
             }
         }
 
@@ -251,7 +257,6 @@ namespace FormTetris
             {
                 if (board.IsPositionOccupied(x, 0))
                 {
-                    // Clear the current shape to make sure it doesn't appear on the board after game over
                     currentShape = null;
                     isRunning = false;
                     return true;

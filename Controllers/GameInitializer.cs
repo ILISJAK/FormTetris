@@ -15,7 +15,6 @@ public class GameInitializer
         DefaultSize = defaultSize;
         this.invalidateAction = invalidateAction;
         Game = new Game();
-        Game.Start();
         InitializeRenderTimer();
     }
 

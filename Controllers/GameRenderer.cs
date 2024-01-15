@@ -7,6 +7,7 @@ namespace FormTetris
     public class GameRenderer
     {
         private Game game;
+        private GameHUD hud;
         private int blockSize;
         private Point gameAreaStart;
         private Dictionary<Point, DateTime> blockDrawTimes = new Dictionary<Point, DateTime>();
@@ -17,6 +18,7 @@ namespace FormTetris
             this.game = game;
             this.blockSize = blockSize;
             this.gameAreaStart = gameAreaStart;
+            hud = new GameHUD(ScoreManager.Instance);
         }
 
         public void UpdateSize(Size newSize)
@@ -40,6 +42,7 @@ namespace FormTetris
             DrawBoard(graphics);
             DrawCurrentShape(graphics);
             DrawGhostShape(graphics, game.GhostShape);
+            hud.DrawHUD(graphics);
         }
 
         public void UpdateBlockSizeAndStart(int blockSize, Point gameAreaStart)

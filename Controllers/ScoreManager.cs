@@ -1,31 +1,50 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace FormTetris
 {
     public class ScoreManager
     {
         public int TotalScore { get; private set; }
-        public TimeSpan GameTime { get; private set; }
+        public TimeSpan GameTime => gameTimeStopwatch.Elapsed;
         public int LinesCleared { get; private set; }
         public int Level { get; private set; }
         public int Tetrises { get; private set; }
         public int TSpins { get; private set; }
         public int Combos { get; private set; }
-        public int TPM => CalculateTPM(); // Tetrominos per minute
-        public int LPM => CalculateLPM(); // Lines per minute
+        public int TPM => CalculateTPM();
+        public int LPM => CalculateLPM();
 
-        private DateTime startTime;
+        private readonly Stopwatch gameTimeStopwatch;
         private int tetrominosDropped;
 
-        public ScoreManager()
+        private static ScoreManager instance;
+        public static ScoreManager Instance => instance ?? (instance = new ScoreManager());
+
+        private ScoreManager()
         {
+            gameTimeStopwatch = new Stopwatch();
             Reset();
         }
 
         public void StartGame()
         {
-            startTime = DateTime.Now;
-            GameTime = TimeSpan.Zero;
+            Reset();
+            gameTimeStopwatch.Start();
+        }
+
+        public void PauseGameTime()
+        {
+            gameTimeStopwatch.Stop();
+        }
+
+        public void ResumeGameTime()
+        {
+            gameTimeStopwatch.Start();
+        }
+
+        public void Reset()
+        {
             TotalScore = 0;
             LinesCleared = 0;
             Level = 1;
@@ -33,30 +52,18 @@ namespace FormTetris
             TSpins = 0;
             Combos = 0;
             tetrominosDropped = 0;
+            ResetGameTime();
         }
 
-        public void UpdateGameTime()
+        public void ResetGameTime()
         {
-            GameTime = DateTime.Now - startTime;
-        }
-
-        public void Reset()
-        {
-            TotalScore = 0;
-            LinesCleared = 0;
-            Level = 0;
-            Tetrises = 0;
-            TSpins = 0;
-            Combos = 0;
-            tetrominosDropped = 0;
-            startTime = DateTime.Now;
+            gameTimeStopwatch.Reset();
         }
 
         public void LineCleared(int lines)
         {
             LinesCleared += lines;
             CalculateScore(lines);
-            // Increment Tetrises if 4 lines are cleared at once
             if (lines == 4) Tetrises++;
         }
 
@@ -68,44 +75,42 @@ namespace FormTetris
         public void TSpin()
         {
             TSpins++;
-            // Update score appropriately for a T-Spin
-            // This method should be called when a T-Spin is performed
         }
 
         public void Combo(int comboLength)
         {
             Combos = Math.Max(Combos, comboLength);
-            // Update score based on combo length
         }
 
         private void CalculateScore(int lines)
         {
-            // Basic scoring logic
             switch (lines)
             {
                 case 1:
-                    TotalScore += 40 * (Level + 1); // Single line
+                    TotalScore += 40 * (Level + 1);
                     break;
                 case 2:
-                    TotalScore += 100 * (Level + 1); // Double line
+                    TotalScore += 100 * (Level + 1);
                     break;
                 case 3:
-                    TotalScore += 300 * (Level + 1); // Triple line
+                    TotalScore += 300 * (Level + 1);
                     break;
                 case 4:
-                    TotalScore += 1200 * (Level + 1); // Tetris (4 lines)
+                    TotalScore += 1200 * (Level + 1);
                     break;
             }
         }
 
         private int CalculateTPM()
         {
-            return tetrominosDropped == 0 ? 0 : (int)(tetrominosDropped / GameTime.TotalMinutes);
+            double totalMinutes = GameTime.TotalMinutes;
+            return totalMinutes > 0 ? (int)(tetrominosDropped / totalMinutes) : 0;
         }
 
         private int CalculateLPM()
         {
-            return LinesCleared == 0 ? 0 : (int)(LinesCleared / GameTime.TotalMinutes);
+            double totalMinutes = GameTime.TotalMinutes;
+            return totalMinutes > 0 ? (int)(LinesCleared / totalMinutes) : 0;
         }
 
         public Score ToScoreEntity()
@@ -124,5 +129,4 @@ namespace FormTetris
             };
         }
     }
-
 }

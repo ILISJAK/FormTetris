@@ -65,6 +65,7 @@ namespace FormTetris
         public void StartNewGame()
         {
             game.Reset();
+            game.Start();
             ShowGameScreen();
         }
 
