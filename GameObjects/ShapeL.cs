@@ -7,7 +7,7 @@ namespace FormTetris
     {
         public ShapeL() : base("L", new List<List<Block>>
         {
-            new List<Block> { new Block(2, 0), new Block(0, 1), new Block(1, 1), new Block(2, 1) }
+            new List<Block> { new Block(0, 0), new Block(0, 1), new Block(1, 1), new Block(2, 1) }
         }, Color.Orange)
         {
         }

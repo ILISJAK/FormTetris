@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -36,7 +37,8 @@ namespace FormTetris
             gameLoopThread = new Thread(new ThreadStart(GameLoop));
             stopwatch = new Stopwatch();
             board.LinesCleared += OnLinesCleared;
-            fallSpeed = 1.0;
+            ScoreManager.LevelChanged += OnLevelChanged;
+            UpdateFallSpeed();
         }
 
         private void GameLoop()
@@ -97,7 +99,6 @@ namespace FormTetris
             }
         }
 
-
         public void Reset()
         {
             board.ClearBoard();
@@ -132,6 +133,22 @@ namespace FormTetris
             manualDropOccurred = false;
         }
 
+        private void UpdateFallSpeed()
+        {
+            // Original fall speed calculation logic
+            var newFallSpeed = Math.Max(1.0 - (ScoreManager.Level - 1) * 0.05, 0.1);
+
+            // Debugging information
+            Debug.WriteLine($"Updating fall speed. Level: {ScoreManager.Level}, New Fall Speed: {newFallSpeed}");
+
+            // Check if the fall speed has actually changed
+            if (Math.Abs(fallSpeed - newFallSpeed) > double.Epsilon)
+            {
+                Debug.WriteLine($"Fall Speed changed from {fallSpeed} to {newFallSpeed}");
+                fallSpeed = newFallSpeed;
+            }
+        }
+
 
         private void UpdateGhostShape()
         {
@@ -148,8 +165,7 @@ namespace FormTetris
         private void InitializeNewShape()
         {
             if (isGameOver) { return; }
-            currentShape = bag.GetNextShape(); // placeholder since we are only examining this shape
-
+            currentShape = bag.GetNextShape();
             // Calculate the width and the leftmost position of the shape
             int minX = currentShape.Blocks.Min(block => block.X);
             int maxX = currentShape.Blocks.Max(block => block.X);
@@ -304,6 +320,10 @@ namespace FormTetris
                 }
             }
             return false;
+        }
+        private void OnLevelChanged(int newLevel)
+        {
+            UpdateFallSpeed();
         }
     }
 }

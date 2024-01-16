@@ -17,7 +17,7 @@ namespace FormTetris
         public void DrawHUD(Graphics graphics)
         {
             string hudText = $"SCORE:\n{scoreManager.TotalScore}\nTIME:\n{FormatTime(scoreManager.GameTime)}\n" +
-                             $"LINES:\n{scoreManager.LinesCleared}\nLEVEL:\n{scoreManager.Level}\n" +
+                             $"LINES:\n{scoreManager.LinesCleared}\nLEVEL:\n{scoreManager.Level+1}\n" +
                              $"GOAL:\n{CalculateGoal()}\nTETRISES:\n{scoreManager.Tetrises}\n" +
                              $"T-SPINS:\n{scoreManager.TSpins}\nCOMBOS:\n{scoreManager.Combos}\n" +
                              $"TPM:\n{scoreManager.TPM}\nLPM:\n{scoreManager.LPM}";

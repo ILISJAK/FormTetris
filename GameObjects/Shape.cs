@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
@@ -12,12 +13,12 @@ namespace FormTetris
         private List<List<Block>> orientations;
         public Color ShapeColor { get; set; }
 
-        public List<Block> Blocks => blocks;
+        public IEnumerable<Block> Blocks => blocks.AsReadOnly();
 
         public Shape(string shapeType, List<List<Block>> shapeOrientations, Color color)
         {
-            ShapeType = shapeType;
-            orientations = shapeOrientations;
+            ShapeType = shapeType ?? throw new ArgumentNullException(nameof(shapeType));
+            orientations = shapeOrientations ?? throw new ArgumentNullException(nameof(shapeOrientations));
             rotationIndex = 0;
             blocks = new List<Block>(orientations[rotationIndex]);
             ShapeColor = color;
@@ -62,11 +63,51 @@ namespace FormTetris
 
         public void Rotate(bool clockwise, Board board)
         {
-            // Assuming the pivot is the second block in the list for simplicity
+            if (ShapeType == "O") { return; }
+
+            // Calculate new positions based on rotation
+            List<Block> newPositions = CalculateRotatedPositions(clockwise);
+
+            // Try to rotate without moving
+            if (IsRotationValid(newPositions, 0, 0, board))
+            {
+                ApplyRotation(newPositions);
+                return;
+            }
+
+            // Lazy Wall kick: Try moving left (-1) or right (1) to rotate
+            // Additionally, check for downward movement if too close to ceiling
+            foreach (int offsetX in new[] { -1, 1 })
+            {
+                if (IsRotationValid(newPositions, offsetX, 0, board))
+                {
+                    ApplyRotation(newPositions, offsetX);
+                    return;
+                }
+
+                // Check for ceiling condition: move down and try rotate
+                if (IsRotationValid(newPositions, offsetX, 1, board))
+                {
+                    ApplyRotation(newPositions, offsetX, 1);
+                    return;
+                }
+            }
+
+            // Check for direct downward movement
+            if (IsRotationValid(newPositions, 0, 1, board))
+            {
+                ApplyRotation(newPositions, 0, 1);
+                return;
+            }
+        }
+
+        // helper methods for rotation 
+
+        private List<Block> CalculateRotatedPositions(bool clockwise)
+        {
             Block pivot = blocks[1];
             List<Block> newPositions = new List<Block>();
 
-            // Calculate new positions based on rotation
             foreach (var block in blocks)
             {
                 int relativeX = block.X - pivot.X;
@@ -74,31 +115,29 @@ namespace FormTetris
 
                 if (clockwise)
                 {
-                    // Clockwise rotation
                     newPositions.Add(new Block(pivot.X + relativeY, pivot.Y - relativeX));
                 }
                 else
                 {
-                    // Counterclockwise rotation
                     newPositions.Add(new Block(pivot.X - relativeY, pivot.Y + relativeX));
                 }
             }
 
-            // Check for collisions with the board boundaries or other blocks
-            foreach (var pos in newPositions)
-            {
-                if (pos.X < 0 || pos.X >= board.BoardWidth || pos.Y < 0 || pos.Y >= board.BoardHeight ||
-                    board.IsPositionOccupied(pos.X, pos.Y))
-                {
-                    return; // Collision detected, so don't rotate
-                }
-            }
+            return newPositions;
+        }
 
-            // If no collision, update blocks to their new positions
+        private bool IsRotationValid(List<Block> newPositions, int offsetX, int offsetY, Board board)
+        {
+            return newPositions.All(pos => board.IsPositionWithinBounds(pos.X + offsetX, pos.Y + offsetY) &&
+                                           !board.IsPositionOccupied(pos.X + offsetX, pos.Y + offsetY));
+        }
+
+        private void ApplyRotation(List<Block> newPositions, int offsetX = 0, int offsetY = 0)
+        {
             for (int i = 0; i < blocks.Count; i++)
             {
-                blocks[i].X = newPositions[i].X;
-                blocks[i].Y = newPositions[i].Y;
+                blocks[i].X = newPositions[i].X + offsetX;
+                blocks[i].Y = newPositions[i].Y + offsetY;
             }
         }
     }

@@ -17,6 +17,8 @@ namespace FormTetris
 
         private readonly Stopwatch gameTimeStopwatch;
         private int tetrominosDropped;
+        public delegate void LevelChangedHandler(int newLevel);
+        public event LevelChangedHandler LevelChanged;
 
         private static ScoreManager instance;
         public static ScoreManager Instance => instance ?? (instance = new ScoreManager());
@@ -47,7 +49,7 @@ namespace FormTetris
         {
             TotalScore = 0;
             LinesCleared = 0;
-            Level = 1;
+            Level = 0;
             Tetrises = 0;
             TSpins = 0;
             Combos = 0;
@@ -65,6 +67,7 @@ namespace FormTetris
             LinesCleared += lines;
             CalculateScore(lines);
             if (lines == 4) Tetrises++;
+            UpdateLevelBasedOnLinesCleared();
         }
 
         public void TetrominoDropped()
@@ -101,6 +104,21 @@ namespace FormTetris
             }
         }
 
+        private void UpdateLevelBasedOnLinesCleared()
+        {
+            int linesThreshold = 10;
+            int newLevel = LinesCleared / linesThreshold;
+
+            // Check if the level has changed before setting it and invoking the event
+            if (Level != newLevel)
+            {
+                Level = newLevel;
+                LevelChanged?.Invoke(newLevel);
+                // Log information for debugging purposes
+                Debug.WriteLine($"Level changed to: {newLevel}");
+            }
+        }
+
         private int CalculateTPM()
         {
             double totalMinutes = GameTime.TotalMinutes;
@@ -120,7 +138,7 @@ namespace FormTetris
                 TotalScore = TotalScore,
                 Time = GameTime,
                 LinesCleared = LinesCleared,
-                LevelReached = Level,
+                LevelReached = Level + 1,
                 Tetrises = Tetrises,
                 TSpins = TSpins,
                 Combos = Combos,
