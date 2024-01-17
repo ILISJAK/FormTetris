@@ -58,11 +58,14 @@
   <ItemGroup>
     <Compile Include="Controllers\GameHUD.cs" />
     <Compile Include="Controllers\UIInitializer.cs" />
-    <Compile Include="Data\Repositories\MatchRepository.cs" />
-    <Compile Include="Data\Repositories\PlayerRepository.cs" />
     <Compile Include="Data\Repositories\ScoreRepository.cs" />
     <Compile Include="GameObjects\Block.cs" />
     <Compile Include="GameObjects\Board.cs" />
+    <Compile Include="Migrations\202401171713049_InitialCreate.cs" />
+    <Compile Include="Migrations\202401171713049_InitialCreate.designer.cs">
+      <DependentUpon>202401171713049_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Utilities\UIElementFactory.cs" />
     <Compile Include="Utilities\UIEventHandlers.cs" />
     <Compile Include="Views\DebugForm.cs">
@@ -77,13 +80,6 @@
     <Compile Include="Controllers\GameInitializer.cs" />
     <Compile Include="Controllers\GameRenderer.cs" />
     <Compile Include="Controllers\InputManager.cs" />
-    <Compile Include="Models\Match.cs" />
-    <Compile Include="Migrations\202401141748144_InitialCreate.cs" />
-    <Compile Include="Migrations\202401141748144_InitialCreate.designer.cs">
-      <DependentUpon>202401141748144_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\Player.cs" />
     <Compile Include="Models\Score.cs" />
     <Compile Include="Controllers\ScoreManager.cs" />
     <Compile Include="GameObjects\Shape.cs" />
@@ -104,11 +100,11 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Migrations\202401171713049_InitialCreate.resx">
+      <DependentUpon>202401171713049_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\DebugForm.resx">
       <DependentUpon>DebugForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202401141748144_InitialCreate.resx">
-      <DependentUpon>202401141748144_InitialCreate.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

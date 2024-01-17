@@ -61,7 +61,7 @@ namespace FormTetris
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Escape)
+            if (e.KeyCode == Keys.Escape && gameInitializer.Game.IsRunning && !gameInitializer.Game.IsGameOver)
             {
                 viewManager.TogglePause();
             }
@@ -103,20 +103,12 @@ namespace FormTetris
         }
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            // Capture the spacebar key press and handle it for FastDrop
             if (keyData == Keys.Space)
             {
-                if (!viewManager.IsPausePanelVisible())
-                {
-                    gameInitializer.Game.FastDrop();
-                    Invalidate(); // Redraw the form to show changes
-                    return true; // Indicate that the key press has been handled
-                }
+                inputManager.HandleSpacebarPress();
+                return true;
             }
-
-            // Call the base class method to handle other command keys
             return base.ProcessCmdKey(ref msg, keyData);
         }
-
     }
 }

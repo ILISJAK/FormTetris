@@ -20,7 +20,7 @@ namespace FormTetris
         private double deltaTime;
         private double fallSpeed;
 
-
+        public event EventHandler GameOver;
         public ScoreManager ScoreManager { get; private set; }
         public Shape GhostShape => ghostShape;
         public Board Board => board;
@@ -67,10 +67,7 @@ namespace FormTetris
             Reset();
             isRunning = true;
             gameLoopRunning = true;
-            if (!gameLoopThread.IsAlive)
-            {
-                gameLoopThread = new Thread(new ThreadStart(GameLoop));
-            }
+            gameLoopThread = new Thread(new ThreadStart(GameLoop));
             gameLoopThread.Start();
             ScoreManager.Instance.StartGame();
         }
@@ -166,6 +163,7 @@ namespace FormTetris
         {
             if (isGameOver) { return; }
             currentShape = bag.GetNextShape();
+            if (currentShape == null) { bag.Reset(); }
             // Calculate the width and the leftmost position of the shape
             int minX = currentShape.Blocks.Min(block => block.X);
             int maxX = currentShape.Blocks.Max(block => block.X);
@@ -189,9 +187,7 @@ namespace FormTetris
             // Check if any block of the new shape is colliding at the new starting position
             if (currentShape.Blocks.Any(block => board.IsPositionOccupied(block.X, block.Y)))
             {
-                // If there's a collision when the shape should be in the initial position,
-                // then it's game over because the spawning area is blocked.
-                isGameOver = true;
+                CheckGameOver();
             }
         }
 
@@ -298,6 +294,7 @@ namespace FormTetris
                 currentShape.MoveDown();
             }
             PlaceShapeAndCheckLines();
+            CheckGameOver();
         }
 
         public void RotateShape(bool clockwise)
@@ -316,6 +313,7 @@ namespace FormTetris
                     ScoreManager.Instance.PauseGameTime();
                     isGameOver = true;
                     isRunning = false;
+                    OnGameOver();
                     return true;
                 }
             }
@@ -324,6 +322,11 @@ namespace FormTetris
         private void OnLevelChanged(int newLevel)
         {
             UpdateFallSpeed();
+        }
+        protected virtual void OnGameOver()
+        {
+            // ScoreManager.Instance.SaveScore();
+            GameOver?.Invoke(this, EventArgs.Empty);
         }
     }
 }

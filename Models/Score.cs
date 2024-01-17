@@ -1,11 +1,15 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace FormTetris
 {
     public class Score
     {
         public int ScoreId { get; set; }
-        public int PlayerId { get; set; }
+
+        [MaxLength(3)] // Set maximum length to 3 characters
+        public string PlayerPseudonym { get; set; }
+
         public int TotalScore { get; set; }
         public TimeSpan Time { get; set; }
         public int LinesCleared { get; set; }
@@ -16,5 +20,4 @@ namespace FormTetris
         public int TPM { get; set; }
         public int LPM { get; set; }
     }
-
 }

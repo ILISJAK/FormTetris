@@ -48,7 +48,7 @@ namespace FormTetris
 
         public void HandleKeyDown(KeyEventArgs e)
         {
-            if (game.IsGameOver)
+            if (game.IsGameOver || !game.IsRunning)
             {
                 return;
             }
@@ -97,6 +97,14 @@ namespace FormTetris
             if (!isLeftKeyPressed && !isRightKeyPressed && !isDownKeyPressed)
             {
                 actionTimer.Stop();
+            }
+        }
+        public void HandleSpacebarPress()
+        {
+            if (game.IsRunning && !game.IsGameOver)
+            {
+                game.FastDrop();
+                invalidate();
             }
         }
     }

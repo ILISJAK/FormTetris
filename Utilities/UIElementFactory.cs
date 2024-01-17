@@ -9,10 +9,11 @@ public class UIElementFactory
 
     public UIElementFactory() { }
 
-    public Button CreateButton(string text)
+    public Button CreateButton(string text, string name = null)
     {
         return new Button
         {
+            Name = name,
             Text = text,
             Size = buttonSize,
             Font = buttonFont,
@@ -22,10 +23,11 @@ public class UIElementFactory
     }
 
     // Method to create a label
-    public Label CreateLabel(string text, Font font = null, ContentAlignment textAlign = ContentAlignment.TopLeft)
+    public Label CreateLabel(string text, Font font = null, ContentAlignment textAlign = ContentAlignment.TopLeft, string name = null)
     {
         return new Label
         {
+            Name = name,
             Text = text,
             Font = font ?? buttonFont, // Use provided font or default
             ForeColor = textColor,
@@ -48,4 +50,49 @@ public class UIElementFactory
             ScrollBars = multiline ? ScrollBars.Vertical : ScrollBars.None
         };
     }
+    public DataGridView CreateDataGridView()
+    {
+        DataGridView dataGridView = new DataGridView
+        {
+            // Set properties for DataGridView
+            BackgroundColor = Color.Black,
+            ForeColor = Color.White,
+            Font = buttonFont,
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+            ReadOnly = true,
+            EnableHeadersVisualStyles = false,
+            ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+            RowHeadersVisible = false,
+            AllowUserToAddRows = false,
+            AllowUserToDeleteRows = false,
+            AllowUserToOrderColumns = true,
+            AllowUserToResizeRows = false,
+            SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+            MultiSelect = false,
+            // Consolidate DefaultCellStyle initialization
+            DefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.Black,
+                ForeColor = Color.White,
+                SelectionBackColor = Color.DarkGray,
+                SelectionForeColor = Color.White
+            },
+            // Initialize ColumnHeadersDefaultCellStyle
+            ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.Black,
+                ForeColor = Color.White
+            },
+            // Initialize RowsDefaultCellStyle
+            RowsDefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.Black,
+                ForeColor = Color.White
+            }
+        };
+
+        return dataGridView;
+    }
+
+
 }

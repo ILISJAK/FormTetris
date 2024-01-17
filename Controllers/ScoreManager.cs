@@ -1,5 +1,8 @@
-﻿using System;
+﻿using FormTetris.Data.Repositories;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace FormTetris
 {
@@ -129,6 +132,21 @@ namespace FormTetris
         {
             double totalMinutes = GameTime.TotalMinutes;
             return totalMinutes > 0 ? (int)(LinesCleared / totalMinutes) : 0;
+        }
+
+        public void SaveScore(string playerPseudonym = "guest")
+        {
+            var scoreEntity = ToScoreEntity();
+            scoreEntity.PlayerPseudonym = playerPseudonym;
+
+            var scoreRepository = new ScoreRepository(new TetrisDbContext());
+            scoreRepository.AddScore(scoreEntity);
+        }
+
+        public async Task<List<ScoreRepository.ScoreWithRank>> GetAllScores()
+        {
+            var scoreRepository = new ScoreRepository(new TetrisDbContext());
+            return await scoreRepository.GetAllScoresWithRanks();
         }
 
         public Score ToScoreEntity()

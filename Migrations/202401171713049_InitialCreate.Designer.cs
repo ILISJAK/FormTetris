@@ -13,7 +13,7 @@ namespace FormTetris.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "202401141748144_InitialCreate"; }
+            get { return "202401171713049_InitialCreate"; }
         }
         
         string IMigrationMetadata.Source
